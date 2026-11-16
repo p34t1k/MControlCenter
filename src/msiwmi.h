@@ -19,6 +19,9 @@ bool setBit(int reg, int bit, bool on);
 bool overdriveSupported();       // MSI: EC 0x2F bit 4 says the panel can do overdrive
 bool overdriveOn();              // EC 0x2E bit 4
 bool setOverdrive(bool on);
+bool taillightSupported();       // MSI Stealth / Raider: chassis rear LED strip (EC 0x2C bit 4 via WMI2)
+bool taillightOn();              // EC 0x2C bit 4
+bool setTaillight(bool on);
 QVector<Feature> features();     // everything MSI Center knows that we can describe for this laptop
 QString supportUrl();            // MSI's support page for this model's BIOS
 }

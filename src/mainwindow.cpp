@@ -224,6 +224,7 @@ MainWindow::MainWindow(QWidget *parent)
     bridge->stateFn = [this] { QMetaObject::invokeMethod(sensors, "pollNow", Qt::QueuedConnection); return stateJson(); };   // last snapshot now, a fresh one is already on its way
     connect(bridge, &ControlBridge::modeRequested, this, &MainWindow::setModeIndex);
     connect(bridge, &ControlBridge::coolerBoostRequested, this, [this](bool on) { setCoolerBoostState(on); });
+    connect(bridge, &ControlBridge::taillightRequested, this, [this](bool on) { msiwmi::setTaillight(on); if (controlsPage) controlsPage->setSwitch(ControlsPage::Taillight, msiwmi::taillightOn()); });
     connect(bridge, &ControlBridge::chargeLimitRequested, this, &MainWindow::setChargeLimit);
     connect(bridge, &ControlBridge::keyboardColor, this, [this](const QString &hex) { QColor c(hex); if (!c.isValid()) return; rgbUser.mode = RgbProfile::Static; rgbUser.color = c; rgbChosen = true; rgbSave(); if (lightingPage) { lightingPage->setChosen(true); lightingPage->setProfile(rgbUser); } rgbPush(); });
     connect(bridge, &ControlBridge::keyboardOff, this, [this] { rgbUser.mode = RgbProfile::Off; rgbChosen = true; rgbSave(); if (lightingPage) { lightingPage->setChosen(true); lightingPage->setProfile(rgbUser); } rgbPush(); });
@@ -1170,8 +1171,9 @@ QString MainWindow::stateJson() const {
     o["model"] = lastModel; o["mode"] = d.mode >= 0 ? modes[d.mode] : "unknown"; o["cpuTemp"] = d.cpuTemp; o["gpuTemp"] = d.gpuTemp;
     o["cpuFanPct"] = d.cpuFanPct; o["gpuFanPct"] = d.gpuFanPct; o["cpuFanRpm"] = d.cpuFanRpm; o["gpuFanRpm"] = d.gpuFanRpm;
     o["coolerBoost"] = d.coolerBoost; o["chargeLimit"] = d.chargeLimit;
-    QJsonObject caps; caps["gpu"] = lastCaps.gpuTemp; caps["fan2"] = lastCaps.fan2; caps["boost"] = lastCaps.coolerBoost; caps["limit"] = lastCaps.chargeLimit;
+    QJsonObject caps; caps["gpu"] = lastCaps.gpuTemp; caps["fan2"] = lastCaps.fan2; caps["boost"] = lastCaps.coolerBoost; caps["limit"] = lastCaps.chargeLimit; caps["taillight"] = lastCaps.taillight;
     QJsonArray mo; for (int i = 0; i < 4; ++i) mo.append(lastCaps.modeOk[i]); caps["modes"] = mo; o["caps"] = caps;
+    if (lastCaps.taillight) o["taillight"] = msiwmi::taillightOn();
     QJsonObject gpu; gpu["supported"] = lastGpuSupported; gpu["state"] = lastGpuState; gpu["mode"] = lastGpuMode; o["dgpu"] = gpu;
     return QString::fromUtf8(QJsonDocument(o).toJson(QJsonDocument::Compact));
 }
@@ -1204,6 +1206,7 @@ void MainWindow::probeCaps() {
     c.fnSwap = msiEcPresent() ? QFile::exists("/sys/devices/platform/msi-ec/fn_key") : true;
     c.usbShare = QFile::exists("/sys/devices/platform/msi-ec/usb_share") || operate.isUsbPowerShareSupport();
     c.overdrive = msiwmi::overdriveSupported();
+    c.taillight = msiwmi::taillightSupported();
     lastCaps = c; lastModel = c.model;
     dashboard->setCaps(c); controlsPage->setCaps(c); fanPage->setCaps(c);
     aboutPage->setInfo(MControlCenter_VERSION, QT_VERSION_STR, QString("%1 · %2").arg(c.fw, QString::fromStdString(operate.getEcBuild())),
@@ -1348,6 +1351,8 @@ void MainWindow::buildPages() {
     controlsPage->onSwitch = [this](ControlsPage::Sw s) {
         if (s == ControlsPage::Overdrive) { const bool want = !msiwmi::overdriveOn(); const bool ok = msiwmi::setOverdrive(want); controlsPage->setSwitch(s, msiwmi::overdriveOn());
             if (!ok && trayIcon) trayIcon->showMessage("MControlCenter", tr("Could not change the panel overdrive: the firmware did not accept it."), QSystemTrayIcon::Warning, 6000); return; }
+        if (s == ControlsPage::Taillight) { const bool want = !msiwmi::taillightOn(); const bool ok = msiwmi::setTaillight(want); controlsPage->setSwitch(s, msiwmi::taillightOn());
+            if (!ok && trayIcon) trayIcon->showMessage("MControlCenter", tr("Could not change the chassis taillight: the firmware did not accept it."), QSystemTrayIcon::Warning, 6000); return; }
         QCheckBox *c = s == ControlsPage::Webcam ? ui->webCamCheckBox : s == ControlsPage::FnSwap ? ui->fnSuperSwapCheckBox : s == ControlsPage::UsbShare ? ui->usbPowerShareCheckBox : ui->coolerBoostCheckBox;
         if (c->isEnabled()) { c->click(); controlsPage->setSwitch(s, c->isChecked()); } };
     controlsPage->onFanCheck = [this] { runFanCheck(); }; controlsPage->onBiosHelp = [] { QDesktopServices::openUrl(QUrl(msiwmi::supportUrl())); };
@@ -1355,6 +1360,7 @@ void MainWindow::buildPages() {
     setCompanionVisible(Settings().getValue("Settings/companion").toBool());
     connect(&fanCheckTimer, &QTimer::timeout, this, &MainWindow::fanCheckPoll); fanCheckTimer.setInterval(3000);
     controlsPage->setSwitch(ControlsPage::Overdrive, msiwmi::overdriveOn());
+    controlsPage->setSwitch(ControlsPage::Taillight, msiwmi::taillightOn());
     controlsPage->onFollowPpd = [this](bool on) { if (ui->autoPPDCheckBox->isEnabled()) { ui->autoPPDCheckBox->setChecked(on); syncPages(Snapshot()); } };
     controlsPage->onAutoAcDc = [this](bool on) { if (ui->autoAcDcProfilesGroupBox->isEnabled()) { ui->autoAcDcProfilesGroupBox->setChecked(on); syncPages(Snapshot()); } };
     controlsPage->onAcDcMode = [this](bool charger, int i) { (charger ? ui->userModeOnChargerComboBox : ui->userModeOnBatteryComboBox)->setCurrentIndex(i); syncPages(Snapshot()); };

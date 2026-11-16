@@ -441,6 +441,10 @@ void Operate::setUserMode(user_mode userMode) const {
         msiEcHelper.setShiftMode(shiftMode);
     }
     
+    Settings s;
+    if (s.isValueExist(settingsGroup + "fanModeAdvanced") && s.getValue(settingsGroup + "fanModeAdvanced").toBool())
+        fanMode = fan_mode::advanced_fan_mode;
+
     if (msiEcHelper.hasFanMode()) {
         msiEcHelper.setFanMode(fanMode);
     }
@@ -577,8 +581,18 @@ void Operate::loadSettings() const {
 
 void Operate::handleWakeEvent() const {
     Settings s;
-    if (s.isValueExist(settingsGroup + "fanModeAdvanced"))
+    std::ignore = updateEcData();
+    if (s.isValueExist(settingsGroup + "fanModeAdvanced")) {
         setFanModeAdvanced(s.getValue(settingsGroup + "fanModeAdvanced").toBool());
+        if (s.isValueExist(settingsGroup + "fan1SpeedSettings"))
+            setFan1SpeedSettings(s.getValueVector(settingsGroup + "fan1SpeedSettings"));
+        if (s.isValueExist(settingsGroup + "fan2SpeedSettings"))
+            setFan2SpeedSettings(s.getValueVector(settingsGroup + "fan2SpeedSettings"));
+        if (s.isValueExist(settingsGroup + "fan1TempSettings"))
+            setFan1TempSettings(s.getValueVector(settingsGroup + "fan1TempSettings"));
+        if (s.isValueExist(settingsGroup + "fan2TempSettings"))
+            setFan2TempSettings(s.getValueVector(settingsGroup + "fan2TempSettings"));
+    }
 }
 
 int Operate::detectFan1Address() const {

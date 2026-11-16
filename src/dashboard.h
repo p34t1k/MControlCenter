@@ -26,7 +26,7 @@ struct Caps {
     bool coolerBoost = true;
     bool chargeLimit = true;
     bool modeOk[4] = {true, true, true, true};   // turbo, balanced, silent, eco
-    bool webcam = true, fnSwap = true, usbShare = false, overdrive = false;   // optional hardware switches
+    bool webcam = true, fnSwap = true, usbShare = false, overdrive = false, taillight = false;   // optional hardware switches
     QString model, board, fw, cpuName, gpuName;
 };
 

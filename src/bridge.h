@@ -18,6 +18,7 @@ public slots:
         if (m >= 0) emit modeRequested(m);
     }
     void SetCoolerBoost(bool on) { emit coolerBoostRequested(on); }
+    void SetTaillight(bool on) { emit taillightRequested(on); }
     void SetChargeLimit(int percent) { if (percent >= 20 && percent <= 100) emit chargeLimitRequested(percent); }
     void ShowWindow() { emit showRequested(); }
     void SetKeyboardColor(const QString &hex) { emit keyboardColor(hex); }        // e.g. "#ff4b1f"
@@ -26,6 +27,7 @@ public slots:
 signals:
     void modeRequested(int mode);
     void coolerBoostRequested(bool on);
+    void taillightRequested(bool on);
     void chargeLimitRequested(int percent);
     void showRequested();
     void keyboardColor(const QString &hex);

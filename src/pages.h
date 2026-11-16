@@ -31,7 +31,7 @@ private:
 class ControlsPage : public AnimPage {
 public:
     explicit ControlsPage(QWidget *p);
-    enum Sw { Webcam, FnSwap, UsbShare, Boost, Overdrive };
+    enum Sw { Webcam, FnSwap, UsbShare, Boost, Overdrive, Taillight };
     void setCaps(const Caps &c);
     void setSwitch(Sw s, bool on);
     void setProfileState(bool followPpd, bool autoAcDc, int onCharger, int onBattery);

@@ -35,7 +35,7 @@ bool biosAllows(int reg) {                                                      
     return ok && v >= 0x112 && v < 0x300;
 }
 // register -> bits that may be changed
-bool allowed(int reg, int bit) { return (reg == 0x2E && bit == 4) || (reg == 0x5B && bit == 5); }
+bool allowed(int reg, int bit) { return (reg == 0x2E && bit == 4) || (reg == 0x5B && bit == 5) || (reg == 0x2C && bit == 4); }
 }  // namespace
 
 QByteArray Helper::wmiGet(const int &reg) const {          // [flag, value] or empty. Reads are harmless but still limited to the registers this app knows about.

@@ -288,11 +288,12 @@ ControlsPage::ControlsPage(QWidget *p) : AnimPage(p) {
     for (int k = 0; k < 2; ++k) { Row r; r.type = Row::Segment; r.label = k == 0 ? "On charger" : "On battery"; r.opts = modeNames(); r.visible = false; r.pick = [this, k](int i) { if (onAcDcMode) onAcDcMode(k == 0, i); }; profile->rows.push_back(r); }
     { Row r; r.type = Row::Text; r.label = "Switch modes any time on the Dashboard. These options only decide what happens automatically."; profile->rows.push_back(r); }
     profile->relayout();
-    const char *lab[5] = {"Webcam", "Swap Fn and Win keys", "USB power share", "Cooler Boost", "Panel overdrive"}, *sub[5] = {"Hardware switch: off disconnects the camera", "Exchange the physical key positions", "Keep USB ports powered when the laptop is off", "Run all fans at maximum speed", "Faster pixel response on the built-in screen (can look slightly sharper or smeary in dark scenes)"};
-    for (int i = 0; i < 5; ++i) { Row r; r.type = Row::Switch; r.label = lab[i]; r.sub = sub[i]; r.click = [this, i] { if (onSwitch) onSwitch(Sw(i)); }; hardware->rows.push_back(r); }
+    const char *lab[6] = {"Webcam", "Swap Fn and Win keys", "USB power share", "Cooler Boost", "Panel overdrive", "Chassis taillight"},
+               *sub[6] = {"Hardware switch: off disconnects the camera", "Exchange the physical key positions", "Keep USB ports powered when the laptop is off", "Run all fans at maximum speed", "Faster pixel response on the built-in screen (can look slightly sharper or smeary in dark scenes)", "Chassis rear RGB light strip on the back edge of the laptop"};
+    for (int i = 0; i < 6; ++i) { Row r; r.type = Row::Switch; r.label = lab[i]; r.sub = sub[i]; r.click = [this, i] { if (onSwitch) onSwitch(Sw(i)); }; hardware->rows.push_back(r); }
     hardware->relayout(); rebuildGpuRows(QString(), QString(), QString(), 0, 0);
 }
-void ControlsPage::setCaps(const Caps &c) { caps = c; hardware->rows[Webcam].visible = c.webcam; hardware->rows[FnSwap].visible = c.fnSwap; hardware->rows[UsbShare].visible = c.usbShare; hardware->rows[Boost].visible = c.coolerBoost; hardware->rows[Overdrive].visible = c.overdrive; hardware->relayout(); }
+void ControlsPage::setCaps(const Caps &c) { caps = c; hardware->rows[Webcam].visible = c.webcam; hardware->rows[FnSwap].visible = c.fnSwap; hardware->rows[UsbShare].visible = c.usbShare; hardware->rows[Boost].visible = c.coolerBoost; hardware->rows[Overdrive].visible = c.overdrive; hardware->rows[Taillight].visible = c.taillight; hardware->relayout(); }
 void ControlsPage::setSwitch(Sw s, bool on) { if (hardware->rows[s].on != on) { hardware->rows[s].on = on; kick(); } }
 void ControlsPage::setProfileState(bool f, bool a, int c, int b) {
     bool ch = profile->rows[0].on != f || profile->rows[1].on != a || profile->rows[2].sel != c || profile->rows[3].sel != b || profile->rows[2].visible != a;
