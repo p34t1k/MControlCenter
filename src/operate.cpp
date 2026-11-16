@@ -442,7 +442,8 @@ void Operate::setUserMode(user_mode userMode) const {
     }
     
     Settings s;
-    if (s.isValueExist(settingsGroup + "fanModeAdvanced") && s.getValue(settingsGroup + "fanModeAdvanced").toBool())
+    const bool isAdvanced = s.isValueExist(settingsGroup + "fanModeAdvanced") && s.getValue(settingsGroup + "fanModeAdvanced").toBool();
+    if (isAdvanced)
         fanMode = fan_mode::advanced_fan_mode;
 
     if (msiEcHelper.hasFanMode()) {
@@ -451,6 +452,17 @@ void Operate::setUserMode(user_mode userMode) const {
 
     if (msiEcHelper.hasSuperBattery()) {
         msiEcHelper.setSuperBattery(superBattery);
+    }
+
+    if (isAdvanced) {
+        if (s.isValueExist(settingsGroup + "fan1SpeedSettings"))
+            setFan1SpeedSettings(s.getValueVector(settingsGroup + "fan1SpeedSettings"));
+        if (s.isValueExist(settingsGroup + "fan2SpeedSettings"))
+            setFan2SpeedSettings(s.getValueVector(settingsGroup + "fan2SpeedSettings"));
+        if (s.isValueExist(settingsGroup + "fan1TempSettings"))
+            setFan1TempSettings(s.getValueVector(settingsGroup + "fan1TempSettings"));
+        if (s.isValueExist(settingsGroup + "fan2TempSettings"))
+            setFan2TempSettings(s.getValueVector(settingsGroup + "fan2TempSettings"));
     }
 
     Settings::setValue(settingsGroup + "UserMode", userModeStr);
@@ -499,10 +511,32 @@ void Operate::setFanMode(int value) const {
 }
 
 void Operate::setFanModeAdvanced(bool enabled) const {
-    if (enabled)
-        helper.putValue(fanModeAddress, fanModeAdvanced);
-    else
-        helper.putValue(fanModeAddress, fanModeAuto);
+    Settings s;
+    if (enabled) {
+        if (msiEcHelper.hasFanMode())
+            msiEcHelper.setFanMode(fan_mode::advanced_fan_mode);
+        else
+            helper.putValue(fanModeAddress, fanModeAdvanced);
+
+        if (s.isValueExist(settingsGroup + "fan1SpeedSettings"))
+            setFan1SpeedSettings(s.getValueVector(settingsGroup + "fan1SpeedSettings"));
+        if (s.isValueExist(settingsGroup + "fan2SpeedSettings"))
+            setFan2SpeedSettings(s.getValueVector(settingsGroup + "fan2SpeedSettings"));
+        if (s.isValueExist(settingsGroup + "fan1TempSettings"))
+            setFan1TempSettings(s.getValueVector(settingsGroup + "fan1TempSettings"));
+        if (s.isValueExist(settingsGroup + "fan2TempSettings"))
+            setFan2TempSettings(s.getValueVector(settingsGroup + "fan2TempSettings"));
+    } else {
+        const QString userModeStr = s.getValue(settingsGroup + "UserMode").toString();
+        const bool isSilent = (userModeStr == "silent_mode");
+        const fan_mode targetFanMode = isSilent ? fan_mode::silent_fan_mode : fan_mode::auto_fan_mode;
+        const int targetValue = isSilent ? fanModeSilent : fanModeAuto;
+
+        if (msiEcHelper.hasFanMode())
+            msiEcHelper.setFanMode(targetFanMode);
+        else
+            helper.putValue(fanModeAddress, targetValue);
+    }
     Settings::setValue(settingsGroup + "fanModeAdvanced", enabled);
 }
 
