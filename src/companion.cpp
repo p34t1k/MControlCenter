@@ -34,7 +34,7 @@ CompanionWidget::CompanionWidget(QWidget *parent) : QWidget(parent) {
     setAttribute(Qt::WA_ShowWithoutActivating);
     setFixedSize(kWidgetW, kSize + kBubbleH);       // wide and tall enough that the bubble is always drawn INSIDE the widget's own rect, never clipped
     setCursor(Qt::OpenHandCursor);
-    setToolTip(tr("MControlCenter's companion -- early placeholder for a future feature, not finished. Right-click to hide it."));
+    setToolTip(tr("Mcenter's companion -- early placeholder for a future feature, not finished. Right-click to hide it."));
     clock.start();
     connect(&anim, &QTimer::timeout, this, &CompanionWidget::tick);
     anim.start(1000 / 15);                          // 15 fps is plenty for a small idle sprite and costs very little
@@ -106,7 +106,7 @@ void CompanionWidget::paintEvent(QPaintEvent *) {
     p.setPen(Qt::NoPen); p.setBrush(alpha(Qt::black, 0.22));
     p.drawEllipse(QPointF(cx, cy0 + r * 0.95), r * 0.85 * (2.0 - squashX), r * 0.2);
     // a small cut-corner badge instead of a generic round blob: the same chamfered-panel language the rest of the
-    // app's UI uses (kit::chamfer), so this reads as "part of MControlCenter" rather than a random emoji face
+    // app's UI uses (kit::chamfer), so this reads as "part of Mcenter" rather than a random emoji face
     const QRectF headR(cx - r, cy - r * 0.92, r * 2, r * 1.84); const QPainterPath head = chamfer(headR, r * 0.32);
     // antenna: a thin stalk off the top-right corner with a glowing sensor tip -- one accessory, our own detail
     const double ax = cx + r * 0.55, ay = headR.top();
@@ -175,7 +175,7 @@ void CompanionWidget::mouseDoubleClickEvent(QMouseEvent *e) { if (e->button() ==
 void CompanionWidget::contextMenuEvent(QContextMenuEvent *e) {
     if (!onBody(e->pos())) return;
     QMenu menu;
-    QAction *open = menu.addAction(tr("Open MControlCenter"));
+    QAction *open = menu.addAction(tr("Open Mcenter"));
     QAction *boost = onToggleBoost ? menu.addAction(tr("Toggle Cooler Boost")) : nullptr;
     QAction *tip = menu.addAction(tr("Show a tip"));
     menu.addSeparator();

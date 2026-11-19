@@ -68,7 +68,7 @@ bool AppProfiles::edit(QWidget *parent) {
                       "QHeaderView::section { background: #1b1d20; color: #8b8f96; border: none; padding: 6px; } QComboBox, QPushButton { background: #1b1d20; color: #e9e6df; border: 1px solid #3a3d42; padding: 4px 10px; }"
                       "QPushButton:hover { border-color: #ff4b1f; }");
     auto *lay = new QVBoxLayout(&dlg);
-    auto *hint = new QLabel(tr("When one of these programs is running, MControlCenter switches to its profile and puts everything back when it closes. The first matching row wins, so put the most important app on top."), &dlg);
+    auto *hint = new QLabel(tr("When one of these programs is running, Mcenter switches to its profile and puts everything back when it closes. The first matching row wins, so put the most important app on top."), &dlg);
     hint->setWordWrap(true); lay->addWidget(hint);
     auto *tbl = new QTableWidget(0, 4, &dlg); tbl->setHorizontalHeaderLabels({tr("Program"), tr("Power mode"), tr("Cooler Boost"), tr("Laptop screen")});
     tbl->horizontalHeader()->setStretchLastSection(true); tbl->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch); tbl->setSelectionBehavior(QAbstractItemView::SelectRows); tbl->setEditTriggers(QAbstractItemView::NoEditTriggers);

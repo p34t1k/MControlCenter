@@ -165,7 +165,7 @@ void DisplaysPage::rebuild(const QList<DdcMonitor> &ms) {
             slider("Sharpness", "", 0x87); slider("Volume", "", 0x62);
         }
         { Row r; r.type = Row::Button; r.label = "Copy monitor report"; r.click = [dm] {
-              const QString t = QString("### MControlCenter monitor report\n```\nmonitor: %1\nconnector: %2\nddc: %3\nfeatures: %4\ncapabilities: %5\n```\nPlease add the make/model of the laptop and what you would like to control.")
+              const QString t = QString("### Mcenter monitor report\n```\nmonitor: %1\nconnector: %2\nddc: %3\nfeatures: %4\ncapabilities: %5\n```\nPlease add the make/model of the laptop and what you would like to control.")
                   .arg(dm.model, dm.connector, dm.ddcOk ? "ok" : "no answer", [&] { QStringList l; for (int c : QList<int>(dm.codes.begin(), dm.codes.end())) l << QString("%1").arg(c, 2, 16, QChar('0')); std::sort(l.begin(), l.end()); return l.join(' '); }(), dm.caps);
               QGuiApplication::clipboard()->setText(t); }; pn->rows.push_back(r); }
         pn->relayout(); pn->show();

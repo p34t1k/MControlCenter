@@ -9,12 +9,12 @@ DBUS_SERVICES_PATH='/usr/share/dbus-1/system-services/'
 
 APP_DIR='./app/'
 
-APP_BIN='mcontrolcenter'
-SVG_ICON='mcontrolcenter.svg'
-SHORTCUT='mcontrolcenter.desktop'
-HELPER_BIN='mcontrolcenter-helper'
-DBUS_CONF='mcontrolcenter-helper.conf'
-DBUS_SERVICE='mcontrolcenter.helper.service'
+APP_BIN='mcenter'
+SVG_ICON='mcenter.svg'
+SHORTCUT='mcenter.desktop'
+HELPER_BIN='mcenter-helper'
+DBUS_CONF='mcenter-helper.conf'
+DBUS_SERVICE='mcenter.helper.service'
 
 echo "Installation start"
 

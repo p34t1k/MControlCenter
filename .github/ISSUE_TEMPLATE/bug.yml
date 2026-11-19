@@ -7,8 +7,8 @@ body:
     validations: { required: true }
   - type: textarea
     id: report
-    attributes: { label: Output of mcontrolcenter-doctor report, render: markdown }
+    attributes: { label: Output of mcenter-doctor report, render: markdown }
     validations: { required: true }
   - type: textarea
     id: log
-    attributes: { label: Log (run `MCC_FRAMELOG=1 mcontrolcenter` from a terminal if it is a UI/performance problem), render: shell }
+    attributes: { label: Log (run `MCC_FRAMELOG=1 mcenter` from a terminal if it is a UI/performance problem), render: shell }

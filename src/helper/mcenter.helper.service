@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=mcenter.helper
+Exec=/usr/libexec/mcenter-helper
+User=root

@@ -13,7 +13,7 @@
 
 namespace {
 // Our own repo's copy of the file, never MSI's. Pure static JSON: no query string, no device or personal data sent.
-const char *kRemoteUrl = "https://raw.githubusercontent.com/p34t1k/MControlCenter/main/data/bios-versions.json";
+const char *kRemoteUrl = "https://raw.githubusercontent.com/p34t1k/Mcenter/main/data/bios-versions.json";
 QString bundledFile() { return QStringLiteral(MCC_DATADIR "/bios-versions.json"); }
 
 // "E15P4IMS.106" -> (prefix="E15P4IMS", suffix=0x106). Returns suffix -1 if unparsable.

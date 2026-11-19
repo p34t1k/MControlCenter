@@ -303,8 +303,8 @@ DashboardPage::DashboardPage(QWidget *parent) : QWidget(parent) {
 
     auto *root = new QVBoxLayout(this); root->setContentsMargins(18, 12, 18, 14); root->setSpacing(8);
     disclaimer = new DisclaimerBar(this); root->addWidget(disclaimer);
-    { const QString key = QString("Legal/stripHidden"); if (Settings().getValue(key).toString() == MControlCenter_VERSION) disclaimer->hide();
-      disclaimer->onHide = [this, key] { Settings::setValue(key, QString(MControlCenter_VERSION)); disclaimer->hide(); }; }
+    { const QString key = QString("Legal/stripHidden"); if (Settings().getValue(key).toString() == Mcenter_VERSION) disclaimer->hide();
+      disclaimer->onHide = [this, key] { Settings::setValue(key, QString(Mcenter_VERSION)); disclaimer->hide(); }; }
     header = new HeaderBar(this); root->addWidget(header);
     banner = new BannerBar(this); root->addWidget(banner);
     banner->onClick = [this] { emit fixRequested(); };

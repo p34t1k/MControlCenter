@@ -1,0 +1,11 @@
+[Unit]
+Description=Mcenter: undo a battery calibration that was cut short (power loss / crash)
+Documentation=https://github.com/p34t1k/Mcenter
+ConditionPathExists=/var/lib/mcenter/calibration.orig
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/mcenter/mcenter-battery boot
+
+[Install]
+WantedBy=multi-user.target

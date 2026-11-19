@@ -1,4 +1,4 @@
-// Neon-dark theme for MControlCenter (matches the Kali / Dr460nized desktop). Applied as a stylesheet on the main window only.
+// Neon-dark theme for Mcenter (matches the Kali / Dr460nized desktop). Applied as a stylesheet on the main window only.
 #ifndef THEME_H
 #define THEME_H
 static const char *kThemeQss = R"QSS(

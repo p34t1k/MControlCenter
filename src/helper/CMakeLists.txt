@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25)
 
-project(MControlCenterHelper LANGUAGES CXX)
+project(McenterHelper LANGUAGES CXX)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_CXX_STANDARD 20)
@@ -13,7 +13,7 @@ find_package(Qt6 6.4 REQUIRED COMPONENTS
   DBus
 )
 
-add_executable(mcontrolcenter-helper
+add_executable(mcenter-helper
   helper.h
   helper.cpp
   readwrite.h
@@ -24,12 +24,12 @@ add_executable(mcontrolcenter-helper
   msi-ec.h
   msi-ec.cpp
 )
-target_link_libraries(mcontrolcenter-helper PRIVATE
+target_link_libraries(mcenter-helper PRIVATE
   Qt6::Core
   Qt6::DBus
 )
 
-target_compile_options(mcontrolcenter-helper PRIVATE -fstack-protector-strong -D_FORTIFY_SOURCE=3 -fstack-clash-protection)
-target_link_options(mcontrolcenter-helper PRIVATE -Wl,-z,relro,-z,now)
+target_compile_options(mcenter-helper PRIVATE -fstack-protector-strong -D_FORTIFY_SOURCE=3 -fstack-clash-protection)
+target_link_options(mcenter-helper PRIVATE -Wl,-z,relro,-z,now)
 
-install(TARGETS mcontrolcenter-helper RUNTIME DESTINATION libexec)
+install(TARGETS mcenter-helper RUNTIME DESTINATION libexec)

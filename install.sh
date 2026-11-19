@@ -1,5 +1,5 @@
 #!/bin/bash
-# MControlCenter installer - builds the app, installs it, and sets up the msi-ec driver so it keeps working after kernel updates.
+# Mcenter installer - builds the app, installs it, and sets up the msi-ec driver so it keeps working after kernel updates.
 #   ./install.sh               install / upgrade
 #   ./install.sh --no-driver   skip the msi-ec kernel driver step
 #   ./install.sh --no-deps     do not install build dependencies (packagers / already installed)
@@ -18,14 +18,14 @@ say() { printf '\033[1;38;5;208m==>\033[0m %s\n' "$*"; }
 FAMILY="${ID:-} ${ID_LIKE:-}"
 
 if [ "$UNINSTALL" = 1 ]; then
-    say "removing MControlCenter"
-    $SUDO systemctl disable --now mcontrolcenter-doctor.service 2>/dev/null || true
-    $SUDO rm -vf /usr/bin/mcontrolcenter /usr/libexec/mcontrolcenter-helper /usr/share/applications/mcontrolcenter.desktop /etc/xdg/autostart/mcontrolcenter.desktop /etc/udev/rules.d/70-mcontrolcenter-rgb.rules /etc/udev/rules.d/71-mcontrolcenter-ddc.rules /etc/modules-load.d/mcontrolcenter-i2c.conf \
-        /usr/share/icons/hicolor/scalable/apps/mcontrolcenter.svg /usr/share/dbus-1/system.d/mcontrolcenter-helper.conf /usr/share/dbus-1/system-services/mcontrolcenter.helper.service \
-        /etc/systemd/system/mcontrolcenter-doctor.service /usr/share/polkit-1/actions/io.github.dmitry_s93.mcontrolcenter.doctor.policy /usr/share/polkit-1/actions/io.github.dmitry_s93.mcontrolcenter.gpu.policy /usr/share/polkit-1/actions/io.github.dmitry_s93.mcontrolcenter.battery.policy /usr/share/polkit-1/actions/io.github.dmitry_s93.mcontrolcenter.helper.policy /etc/systemd/system/mcontrolcenter-battery.service
+    say "removing Mcenter"
+    $SUDO systemctl disable --now mcenter-doctor.service 2>/dev/null || true
+    $SUDO rm -vf /usr/bin/mcenter /usr/libexec/mcenter-helper /usr/share/applications/mcenter.desktop /etc/xdg/autostart/mcenter.desktop /etc/udev/rules.d/70-mcenter-rgb.rules /etc/udev/rules.d/71-mcenter-ddc.rules /etc/modules-load.d/mcenter-i2c.conf \
+        /usr/share/icons/hicolor/scalable/apps/mcenter.svg /usr/share/dbus-1/system.d/mcenter-helper.conf /usr/share/dbus-1/system-services/mcenter.helper.service \
+        /etc/systemd/system/mcenter-doctor.service /usr/share/polkit-1/actions/io.github.p34t1k.mcenter.doctor.policy /usr/share/polkit-1/actions/io.github.p34t1k.mcenter.gpu.policy /usr/share/polkit-1/actions/io.github.p34t1k.mcenter.battery.policy /usr/share/polkit-1/actions/io.github.p34t1k.mcenter.helper.policy /etc/systemd/system/mcenter-battery.service
     $SUDO dkms remove msi-wmi-platform/1.0 --all 2>/dev/null || true; $SUDO rm -rf /usr/src/msi-wmi-platform-1.0
-    $SUDO rm -rvf /usr/libexec/mcontrolcenter
-    $SUDO rm -rvf /usr/share/mcontrolcenter
+    $SUDO rm -rvf /usr/libexec/mcenter
+    $SUDO rm -rvf /usr/share/mcenter
     say "done (the msi-ec driver was left in place; remove it with: sudo dkms remove msi-ec --all)"; exit 0
 fi
 
@@ -43,34 +43,50 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release >/dev/null
 cmake --build build --parallel "$(nproc)"; }
 
 say "installing"
-$SUDO install -Dm755 build/mcontrolcenter /usr/bin/mcontrolcenter
-$SUDO install -Dm755 build/helper/mcontrolcenter-helper /usr/libexec/mcontrolcenter-helper
-$SUDO install -Dm644 resources/mcontrolcenter.desktop /usr/share/applications/mcontrolcenter.desktop
-$SUDO install -Dm644 resources/mcontrolcenter.svg /usr/share/icons/hicolor/scalable/apps/mcontrolcenter.svg
-$SUDO install -Dm644 src/helper/mcontrolcenter-helper.conf /usr/share/dbus-1/system.d/mcontrolcenter-helper.conf
-$SUDO install -Dm644 src/helper/mcontrolcenter.helper.service /usr/share/dbus-1/system-services/mcontrolcenter.helper.service
-$SUDO install -Dm644 data/bios-versions.json /usr/share/mcontrolcenter/bios-versions.json      # bundled fallback for the community BIOS-version hint (the app also tries to refresh it from GitHub)
-$SUDO pkill -f /usr/libexec/mcontrolcenter-helper 2>/dev/null || true      # an old helper would keep running the previous code; D-Bus starts the new one on demand
-$SUDO install -Dm755 scripts/mcontrolcenter-doctor /usr/libexec/mcontrolcenter/mcontrolcenter-doctor
-$SUDO install -Dm755 scripts/mcontrolcenter-gpu /usr/libexec/mcontrolcenter/mcontrolcenter-gpu
-$SUDO install -Dm755 scripts/mcontrolcenter-battery /usr/libexec/mcontrolcenter/mcontrolcenter-battery
-$SUDO install -Dm644 packaging/io.github.dmitry_s93.mcontrolcenter.battery.policy /usr/share/polkit-1/actions/io.github.dmitry_s93.mcontrolcenter.battery.policy
-$SUDO install -Dm644 packaging/io.github.dmitry_s93.mcontrolcenter.helper.policy /usr/share/polkit-1/actions/io.github.dmitry_s93.mcontrolcenter.helper.policy
-$SUDO install -Dm644 packaging/mcontrolcenter-battery.service /etc/systemd/system/mcontrolcenter-battery.service
-$SUDO install -Dm644 packaging/io.github.dmitry_s93.mcontrolcenter.gpu.policy /usr/share/polkit-1/actions/io.github.dmitry_s93.mcontrolcenter.gpu.policy
-$SUDO install -Dm644 packaging/io.github.dmitry_s93.mcontrolcenter.doctor.policy /usr/share/polkit-1/actions/io.github.dmitry_s93.mcontrolcenter.doctor.policy
-$SUDO install -Dm644 packaging/mcontrolcenter-doctor.service /etc/systemd/system/mcontrolcenter-doctor.service
-$SUDO install -Dm644 packaging/70-mcontrolcenter-rgb.rules /etc/udev/rules.d/70-mcontrolcenter-rgb.rules
-$SUDO install -Dm644 packaging/71-mcontrolcenter-ddc.rules /etc/udev/rules.d/71-mcontrolcenter-ddc.rules
-$SUDO sh -c "echo i2c-dev > /etc/modules-load.d/mcontrolcenter-i2c.conf"; $SUDO modprobe i2c-dev 2>/dev/null || true   # DDC/CI monitor control needs /dev/i2c-N
+$SUDO install -Dm755 build/mcenter /usr/bin/mcenter
+$SUDO install -Dm755 build/helper/mcenter-helper /usr/libexec/mcenter-helper
+$SUDO install -Dm644 resources/mcenter.desktop /usr/share/applications/mcenter.desktop
+$SUDO install -Dm644 resources/mcenter.svg /usr/share/icons/hicolor/scalable/apps/mcenter.svg
+$SUDO install -Dm644 src/helper/mcenter-helper.conf /usr/share/dbus-1/system.d/mcenter-helper.conf
+$SUDO install -Dm644 src/helper/mcenter.helper.service /usr/share/dbus-1/system-services/mcenter.helper.service
+$SUDO install -Dm644 data/bios-versions.json /usr/share/mcenter/bios-versions.json      # bundled fallback for the community BIOS-version hint (the app also tries to refresh it from GitHub)
+$SUDO pkill -f /usr/libexec/mcenter-helper 2>/dev/null || true      # an old helper would keep running the previous code; D-Bus starts the new one on demand
+$SUDO install -Dm755 scripts/mcenter-doctor /usr/libexec/mcenter/mcenter-doctor
+$SUDO install -Dm755 scripts/mcenter-gpu /usr/libexec/mcenter/mcenter-gpu
+$SUDO install -Dm755 scripts/mcenter-battery /usr/libexec/mcenter/mcenter-battery
+$SUDO install -Dm644 packaging/io.github.p34t1k.mcenter.battery.policy /usr/share/polkit-1/actions/io.github.p34t1k.mcenter.battery.policy
+$SUDO install -Dm644 packaging/io.github.p34t1k.mcenter.helper.policy /usr/share/polkit-1/actions/io.github.p34t1k.mcenter.helper.policy
+# --- migrate from the pre-rename name (MControlCenter) ---
+OLD=mcontrolcenter
+if [ -e /usr/bin/$OLD ] || [ -d /var/lib/$OLD ] || [ -d /etc/$OLD ]; then
+    say "removing the old MControlCenter install (now Mcenter)"
+    $SUDO systemctl disable --now $OLD-doctor.service $OLD-battery.service 2>/dev/null || true
+    $SUDO pkill -x $OLD 2>/dev/null || true
+    $SUDO rm -vf /usr/bin/$OLD /usr/libexec/$OLD-helper /usr/share/applications/$OLD.desktop /etc/xdg/autostart/$OLD.desktop /etc/udev/rules.d/70-$OLD-rgb.rules /etc/udev/rules.d/71-$OLD-ddc.rules /etc/modules-load.d/$OLD-i2c.conf \
+        /usr/share/icons/hicolor/scalable/apps/$OLD.svg /usr/share/dbus-1/system.d/$OLD-helper.conf /usr/share/dbus-1/system-services/$OLD.helper.service \
+        /etc/systemd/system/$OLD-doctor.service /etc/systemd/system/$OLD-battery.service /usr/share/polkit-1/actions/io.github.dmitry_s93.$OLD.*.policy
+    $SUDO rm -rf /usr/libexec/$OLD /usr/share/$OLD
+    # keep calibration/doctor state and the no-calibration-boost opt-out: move, never delete
+    [ -d /var/lib/$OLD ] && [ ! -e /var/lib/mcenter ] && $SUDO mv /var/lib/$OLD /var/lib/mcenter
+    [ -d /etc/$OLD ] && [ ! -e /etc/mcenter ] && $SUDO mv /etc/$OLD /etc/mcenter
+    $SUDO systemctl daemon-reload 2>/dev/null || true
+fi
+
+$SUDO install -Dm644 packaging/mcenter-battery.service /etc/systemd/system/mcenter-battery.service
+$SUDO install -Dm644 packaging/io.github.p34t1k.mcenter.gpu.policy /usr/share/polkit-1/actions/io.github.p34t1k.mcenter.gpu.policy
+$SUDO install -Dm644 packaging/io.github.p34t1k.mcenter.doctor.policy /usr/share/polkit-1/actions/io.github.p34t1k.mcenter.doctor.policy
+$SUDO install -Dm644 packaging/mcenter-doctor.service /etc/systemd/system/mcenter-doctor.service
+$SUDO install -Dm644 packaging/70-mcenter-rgb.rules /etc/udev/rules.d/70-mcenter-rgb.rules
+$SUDO install -Dm644 packaging/71-mcenter-ddc.rules /etc/udev/rules.d/71-mcenter-ddc.rules
+$SUDO sh -c "echo i2c-dev > /etc/modules-load.d/mcenter-i2c.conf"; $SUDO modprobe i2c-dev 2>/dev/null || true   # DDC/CI monitor control needs /dev/i2c-N
 $SUDO udevadm control --reload-rules 2>/dev/null || true; $SUDO udevadm trigger --subsystem-match=hidraw 2>/dev/null || true; $SUDO udevadm trigger --subsystem-match=i2c-dev 2>/dev/null || true
-$SUDO install -Dm644 packaging/mcontrolcenter-autostart.desktop /etc/xdg/autostart/mcontrolcenter.desktop
+$SUDO install -Dm644 packaging/mcenter-autostart.desktop /etc/xdg/autostart/mcenter.desktop
 $SUDO systemctl daemon-reload
 $SUDO systemctl reload dbus 2>/dev/null || true
-[ "$DRY" = 1 ] && echo "[dry-run] would run: systemctl enable mcontrolcenter-doctor.service mcontrolcenter-battery.service"
-$SUDO systemctl enable mcontrolcenter-doctor.service mcontrolcenter-battery.service >/dev/null 2>&1 || true   # boot-time self-heal after kernel updates / interrupted calibration
+[ "$DRY" = 1 ] && echo "[dry-run] would run: systemctl enable mcenter-doctor.service mcenter-battery.service"
+$SUDO systemctl enable mcenter-doctor.service mcenter-battery.service >/dev/null 2>&1 || true   # boot-time self-heal after kernel updates / interrupted calibration
 # automatic battery calibration needs MSI's WMI platform driver: use the kernel's own if present, else register the DKMS copy (built per kernel)
-[ "$DRY" = 1 ] && echo "[dry-run] would also (on an MSI laptop whose kernel lacks msi-wmi-platform): copy packaging/msi-wmi-platform to /usr/src/msi-wmi-platform-1.0 and register it with DKMS; and set up the msi-ec driver via mcontrolcenter-doctor if it is not loaded"
+[ "$DRY" = 1 ] && echo "[dry-run] would also (on an MSI laptop whose kernel lacks msi-wmi-platform): copy packaging/msi-wmi-platform to /usr/src/msi-wmi-platform-1.0 and register it with DKMS; and set up the msi-ec driver via mcenter-doctor if it is not loaded"
 if grep -qiE 'micro-star|msi' /sys/class/dmi/id/sys_vendor 2>/dev/null && ! modinfo msi-wmi-platform >/dev/null 2>&1 && command -v dkms >/dev/null 2>&1; then
     say "registering the msi-wmi-platform driver (for automatic battery calibration)"
     $SUDO rm -rf /usr/src/msi-wmi-platform-1.0; $SUDO mkdir -p /usr/src/msi-wmi-platform-1.0; $SUDO cp packaging/msi-wmi-platform/* /usr/src/msi-wmi-platform-1.0/
@@ -79,11 +95,11 @@ fi
 
 if [ "$DRIVER" = 1 ]; then
     say "checking the msi-ec driver"
-    state="$(/usr/libexec/mcontrolcenter/mcontrolcenter-doctor status | sed -n 's/^state=//p')"
+    state="$(/usr/libexec/mcenter/mcenter-doctor status | sed -n 's/^state=//p')"
     case "$state" in
         ok) say "msi-ec is already loaded" ;;
         not-msi) say "this does not look like an MSI laptop - the app will still run in read-only fallback mode" ;;
-        *) say "msi-ec needs setup (state: $state) - building it for kernel $(uname -r)"; $SUDO /usr/libexec/mcontrolcenter/mcontrolcenter-doctor fix || say "driver setup did not finish - open the app, the banner on the Dashboard will explain what is missing" ;;
+        *) say "msi-ec needs setup (state: $state) - building it for kernel $(uname -r)"; $SUDO /usr/libexec/mcenter/mcenter-doctor fix || say "driver setup did not finish - open the app, the banner on the Dashboard will explain what is missing" ;;
     esac
 fi
-say "installed. Start it from the application menu (it lives in the system tray) or run: mcontrolcenter"
+say "installed. Start it from the application menu (it lives in the system tray) or run: mcenter"

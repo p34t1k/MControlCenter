@@ -3,9 +3,11 @@
 All notable changes to this project will be documented in this file.
 
 ## Unreleased
+- Upstream moved to the MControlSuite organisation (the old dmitry-s93 repos are dead): credit links updated, and the driver doctor now fetches msi-ec from MControlSuite/msi-ec (v0.18 line; matches firmware by prefix, so a BIOS update no longer breaks the driver).
+- **Project renamed from MControlCenter to Mcenter** (requested by the upstream maintainer, because the fork has diverged). New names: binary `mcenter`, package `mcenter`, D-Bus `io.github.p34t1k.Mcenter`, polkit actions `io.github.p34t1k.mcenter.*`, config `~/.config/Mcenter.conf`, data `~/.local/share/mcenter`. The app migrates the old user config, data, cache and autostart entry on first start; `install.sh` removes the old system files. Environment knobs keep their `MCC_` prefix. Credit to the original MControlCenter by Dmitry Serov is kept in the README and file headers.
 
-## [0.6.1] 2026-11-15 (fork, p34t1k/MControlCenter)
-- **Security: root helper lockdown.** Before this, any local user could call the root helper over D-Bus and write any byte to any EC offset (inherited from upstream). Now: every state-changing call is checked with polkit (action `io.github.dmitry_s93.mcontrolcenter.helper-write`: allowed without a prompt for a local active session, administrator otherwise, refused if polkit is unavailable); raw EC writes are limited to the offsets the app uses, each with a value allowlist (the hottest fan-curve point can never be set below 50 %); sysfs writes accept only plain tokens and range-checked numbers; `quit` and the `ec_sys` module load are gated too; the helper is built with stack protector, FORTIFY and full RELRO/BIND_NOW. Existing installs need the new `.policy` file (install.sh and the packages ship it).
+## [0.6.1] 2026-11-15 (fork, p34t1k/Mcenter)
+- **Security: root helper lockdown.** Before this, any local user could call the root helper over D-Bus and write any byte to any EC offset (inherited from upstream). Now: every state-changing call is checked with polkit (action `io.github.p34t1k.mcenter.helper-write`: allowed without a prompt for a local active session, administrator otherwise, refused if polkit is unavailable); raw EC writes are limited to the offsets the app uses, each with a value allowlist (the hottest fan-curve point can never be set below 50 %); sysfs writes accept only plain tokens and range-checked numbers; `quit` and the `ec_sys` module load are gated too; the helper is built with stack protector, FORTIFY and full RELRO/BIND_NOW. Existing installs need the new `.policy` file (install.sh and the packages ship it).
 - **Compatibility of the lockdown:** if polkit does not see your session as local and active (bare window manager, no logind, ssh), the dashboard now shows a banner with an Authorize button that lets polkit ask for the administrator password (new helper methods `isAuthorized` / `requestAuthorization`); previously such a setup would have ignored every click silently. On desktops without a system tray the window now opens at start and closing it quits. README has a Requirements section.
 - Calibration: remaining-time estimate and MSI-style drain boost (full backlight + light CPU load)
 - Panel overdrive toggle, fan dust check (BIOS-gated), firmware card with BIOS age and a community BIOS hint, MSI charge-limit names, unofficial/beta disclaimer
@@ -14,7 +16,7 @@ All notable changes to this project will be documented in this file.
 - Optional desktop companion widget (early placeholder)
 - Accessibility: every custom-drawn control is now reachable by keyboard (Tab between panels; arrows inside; Space/Enter to press; sliders and the fan curve with arrow keys) with a visible focus ring, and exposed to screen readers (Orca/AT-SPI) as real switches, buttons, radio buttons and sliders; the page tabs are focusable; panels read out their live values
 
-## [0.6.0] 2026-11-15 (fork, p34t1k/MControlCenter)
+## [0.6.0] 2026-11-15 (fork, p34t1k/Mcenter)
 - Redesigned UI (dashboard, Controls, Battery, Fans, Lighting, Displays, Settings), Plasma Power & Battery applet, session D-Bus API
 - Mystic Light keyboard lighting, Displays tab (refresh rate, DDC/CI), discrete-GPU boot mode
 - Battery calibration (guided and automatic with charger connected), health history graph, health-drop alert, interrupted-calibration recovery

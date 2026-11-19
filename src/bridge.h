@@ -1,5 +1,5 @@
 // Session-bus control interface so desktop widgets (Plasma panel applet, scripts) can read state and drive the EC through the running app.
-//   gdbus call --session -d io.github.dmitry_s93.MControlCenter -o /Control -m io.github.dmitry_s93.MControlCenter.Control.State
+//   gdbus call --session -d io.github.p34t1k.Mcenter -o /Control -m io.github.p34t1k.Mcenter.Control.State
 #ifndef BRIDGE_H
 #define BRIDGE_H
 #include <QObject>
@@ -7,7 +7,7 @@
 
 class ControlBridge : public QObject {
     Q_OBJECT
-    Q_CLASSINFO("D-Bus Interface", "io.github.dmitry_s93.MControlCenter.Control")
+    Q_CLASSINFO("D-Bus Interface", "io.github.p34t1k.Mcenter.Control")
 public:
     explicit ControlBridge(QObject *parent = nullptr) : QObject(parent) {}
     std::function<QString()> stateFn;

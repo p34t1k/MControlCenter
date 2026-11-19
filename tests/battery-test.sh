@@ -1,8 +1,8 @@
 #!/bin/bash
-# Exercises scripts/mcontrolcenter-battery against a SIMULATED battery (plain files + a small physics loop), no hardware, no root.
+# Exercises scripts/mcenter-battery against a SIMULATED battery (plain files + a small physics loop), no hardware, no root.
 # Covers: full cycle, cancel mid-discharge, stalled battery, hard kill + boot-time recovery, soft-unplug bit preservation.
 set -u
-HERE="$(cd "$(dirname "$0")/.." && pwd)"; SCRIPT="${MCC_SCRIPT:-$HERE/scripts/mcontrolcenter-battery}"
+HERE="$(cd "$(dirname "$0")/.." && pwd)"; SCRIPT="${MCC_SCRIPT:-$HERE/scripts/mcenter-battery}"
 fail=0; pass=0
 ok() { if eval "$2"; then pass=$((pass + 1)); echo "  ok   $1"; else fail=$((fail + 1)); echo "  FAIL $1   [$2]"; fi; }
 

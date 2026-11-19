@@ -1,19 +1,19 @@
 /* Copyright (C) 2022  Dmitry Serov
  *
- * This file is part of MControlCenter.
+ * This file is part of Mcenter.
  *
- * MControlCenter is free software: you can redistribute it and/or
+ * Mcenter is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of
  * the License, or (at your option) any later version.
  *
- * MControlCenter is distributed in the hope that it will be useful,
+ * Mcenter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with MControlCenter. If not, see <https://www.gnu.org/licenses/>.
+ * with Mcenter. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "mainwindow.h"
@@ -267,7 +267,7 @@ MainWindow::MainWindow(QWidget *parent)
         });
     }
     ui->QtVersionValue->setText(QT_VERSION_STR);
-    ui->versionValueLabel->setText(MControlCenter_VERSION);
+    ui->versionValueLabel->setText(Mcenter_VERSION);
     ui->autoAcDcProfilesGroupBox->setChecked(s.getValue("Settings/autoAcDcProfilesState").toBool());
     ui->userModeOnBatteryComboBox->setCurrentIndex(s.getValue("Settings/UserModeOnBattery").toInt());
     ui->userModeOnChargerComboBox->setCurrentIndex(s.getValue("Settings/UserModeOnCharger").toInt());
@@ -1074,7 +1074,7 @@ void MainWindow::createTrayIcon() {
     trayIcon->setContextMenu(trayIconMenu);
     auto icon = QIcon(":/images/AppIcon");
     trayIcon->setIcon(icon);
-    trayIcon->setToolTip("MControlCenter");
+    trayIcon->setToolTip("Mcenter");
 
     trayIcon->show();
 
@@ -1143,7 +1143,7 @@ void MainWindow::pushDashboard() {
     }
     if (trayIcon) {
         static const char *names[] = {"Turbo", "Balanced", "Silent", "Super Battery"}; const DashData &d = dashData;
-        trayIcon->setToolTip(QString("MControlCenter\n%1  ·  CPU %2 °C%3\nFan %4 %  ·  charge limit %5 %")
+        trayIcon->setToolTip(QString("Mcenter\n%1  ·  CPU %2 °C%3\nFan %4 %  ·  charge limit %5 %")
             .arg(d.mode >= 0 ? names[d.mode] : "?").arg(d.cpuTemp).arg(d.gpuTemp > 0 ? QString("  ·  GPU %1 °C").arg(d.gpuTemp) : QString()).arg(d.cpuFanPct).arg(d.chargeLimit));
     }
 }
@@ -1206,7 +1206,7 @@ void MainWindow::probeCaps() {
     c.overdrive = msiwmi::overdriveSupported();
     lastCaps = c; lastModel = c.model;
     dashboard->setCaps(c); controlsPage->setCaps(c); fanPage->setCaps(c);
-    aboutPage->setInfo(MControlCenter_VERSION, QT_VERSION_STR, QString("%1 · %2").arg(c.fw, QString::fromStdString(operate.getEcBuild())),
+    aboutPage->setInfo(Mcenter_VERSION, QT_VERSION_STR, QString("%1 · %2").arg(c.fw, QString::fromStdString(operate.getEcBuild())),
                        msiEcPresent() ? QString("msi-ec %1").arg(slurp("/sys/module/msi_ec/version").isEmpty() ? QString("(DKMS)") : slurp("/sys/module/msi_ec/version")) : QString("not loaded (ec_sys fallback)"),
                        QSysInfo::kernelVersion(), QString("%1 · %2").arg(qEnvironmentVariable("XDG_CURRENT_DESKTOP", "unknown"), qEnvironmentVariable("XDG_SESSION_TYPE", "unknown")));
     syncFanEditor(); refreshFeatures();
@@ -1236,7 +1236,7 @@ void MainWindow::checkAuth() {
 // Friendly replacement for the old "msi-ec not loaded" dialog: say what is wrong and offer the one-click fix.
 void MainWindow::checkDriver() {
     if (operate.isMsiEcLoaded()) { if (bannerKind != "auth") dashboard->setProblem(QString(), QString()); return; }
-    const QString doctor = "/usr/libexec/mcontrolcenter/mcontrolcenter-doctor";
+    const QString doctor = "/usr/libexec/mcenter/mcenter-doctor";
     QString state, fw;
     if (QFile::exists(doctor)) {
         QProcess pr; pr.start(doctor, {"status"}); pr.waitForFinished(5000);
@@ -1246,7 +1246,7 @@ void MainWindow::checkDriver() {
     else if (state == "unsupported-firmware") dashboard->setProblem(tr("The msi-ec driver does not know this EC firmware (%1) yet. Basic monitoring works; please report the firmware to the msi-ec project.").arg(fw), QString());
     else if (state == "secureboot") dashboard->setProblem(tr("Secure Boot rejected the msi-ec module. Enroll the DKMS signing key (mokutil --import /var/lib/dkms/mok.pub) and reboot."), QString());
     else if (!state.isEmpty()) dashboard->setProblem(tr("The msi-ec driver is not built for this kernel (%1). This usually happens right after a kernel update.").arg(state), tr("Fix it now"));
-    else dashboard->setProblem(tr("The msi-ec driver is not loaded. Reinstall MControlCenter with install.sh to set up the driver and automatic repair after kernel updates."), QString());
+    else dashboard->setProblem(tr("The msi-ec driver is not loaded. Reinstall Mcenter with install.sh to set up the driver and automatic repair after kernel updates."), QString());
 }
 
 // ── battery health history: one row a day (D) + one per calibration (C), plain CSV in the app data folder ──
@@ -1269,10 +1269,10 @@ void MainWindow::restoreCharger() {
     auto *pr = new QProcess(this);
     connect(pr, &QProcess::finished, this, [this, pr](int code, QProcess::ExitStatus) {
         pr->deleteLater();
-        if (code == 0) { bannerKind.clear(); calOrphan = false; dashboard->setProblem(QString(), QString()); if (trayIcon) trayIcon->showMessage("MControlCenter", tr("Charger state and charge limit restored."), QSystemTrayIcon::Information, 6000); }
-        else { dashboard->setProblem(tr("Restore did not finish (authentication cancelled or failed). Try again, or run: pkexec /usr/libexec/mcontrolcenter/mcontrolcenter-battery restore"), tr("Try again")); }
+        if (code == 0) { bannerKind.clear(); calOrphan = false; dashboard->setProblem(QString(), QString()); if (trayIcon) trayIcon->showMessage("Mcenter", tr("Charger state and charge limit restored."), QSystemTrayIcon::Information, 6000); }
+        else { dashboard->setProblem(tr("Restore did not finish (authentication cancelled or failed). Try again, or run: pkexec /usr/libexec/mcenter/mcenter-battery restore"), tr("Try again")); }
     });
-    pr->start("pkexec", {"/usr/libexec/mcontrolcenter/mcontrolcenter-battery", "restore"});
+    pr->start("pkexec", {"/usr/libexec/mcenter/mcenter-battery", "restore"});
 }
 
 void MainWindow::runDoctorFix() {
@@ -1281,10 +1281,10 @@ void MainWindow::runDoctorFix() {
     connect(pr, &QProcess::finished, this, [this, pr](int code, QProcess::ExitStatus) {
         QString err = QString::fromUtf8(pr->readAllStandardError()).trimmed().split('\n').last();
         pr->deleteLater();
-        if (code == 0) { QProcess::startDetached("/bin/sh", {"-c", "sleep 1; exec mcontrolcenter"}); quitApp(); }
+        if (code == 0) { QProcess::startDetached("/bin/sh", {"-c", "sleep 1; exec mcenter"}); quitApp(); }
         else dashboard->setProblem(tr("Repair did not finish: %1").arg(err.isEmpty() ? tr("authentication cancelled or failed") : err), tr("Try again"));
     });
-    pr->start("pkexec", {"/usr/libexec/mcontrolcenter/mcontrolcenter-doctor", "fix"});
+    pr->start("pkexec", {"/usr/libexec/mcenter/mcenter-doctor", "fix"});
 }
 
 // ───────────────────────────── pages: wiring between the new UI and the existing backend slots ─────────────────────────────
@@ -1324,14 +1324,14 @@ void MainWindow::buildPages() {
         if (r.mode >= 0) setModeIndex(r.mode);
         if (r.boost >= 0) setCoolerBoostState(r.boost == 1);
         if (r.hz >= 0) { appHzHold = true; panelRefresh->setHzValue(r.hz); }
-        if (trayIcon) trayIcon->showMessage("MControlCenter", tr("%1 is running: app profile applied.").arg(r.proc), QSystemTrayIcon::Information, 3000);
+        if (trayIcon) trayIcon->showMessage("Mcenter", tr("%1 is running: app profile applied.").arg(r.proc), QSystemTrayIcon::Information, 3000);
     });
     connect(appProfiles, &AppProfiles::deactivated, this, [this] {
         if (!appActive) return; appActive = false;
         if (appSavedMode >= 0 && !gameActive) setModeIndex(appSavedMode);
         if (appSavedBoost >= 0 && !gameActive) setCoolerBoostState(appSavedBoost == 1);
         if (appHzHold) { appHzHold = false; if (autoRefresh && lastAcState >= 0) panelRefresh->applyForPower(lastAcState == 1); }
-        if (trayIcon) trayIcon->showMessage("MControlCenter", tr("App closed: back to your previous settings."), QSystemTrayIcon::Information, 3000);
+        if (trayIcon) trayIcon->showMessage("Mcenter", tr("App closed: back to your previous settings."), QSystemTrayIcon::Information, 3000);
     });
     connect(&gameTimer, &QTimer::timeout, this, &MainWindow::gameModeTick); gameTimer.setInterval(5000);
     if (Settings().getValue("Settings/gameMode").toBool()) gameTimer.start();
@@ -1347,7 +1347,7 @@ void MainWindow::buildPages() {
 
     controlsPage->onSwitch = [this](ControlsPage::Sw s) {
         if (s == ControlsPage::Overdrive) { const bool want = !msiwmi::overdriveOn(); const bool ok = msiwmi::setOverdrive(want); controlsPage->setSwitch(s, msiwmi::overdriveOn());
-            if (!ok && trayIcon) trayIcon->showMessage("MControlCenter", tr("Could not change the panel overdrive: the firmware did not accept it."), QSystemTrayIcon::Warning, 6000); return; }
+            if (!ok && trayIcon) trayIcon->showMessage("Mcenter", tr("Could not change the panel overdrive: the firmware did not accept it."), QSystemTrayIcon::Warning, 6000); return; }
         QCheckBox *c = s == ControlsPage::Webcam ? ui->webCamCheckBox : s == ControlsPage::FnSwap ? ui->fnSuperSwapCheckBox : s == ControlsPage::UsbShare ? ui->usbPowerShareCheckBox : ui->coolerBoostCheckBox;
         if (c->isEnabled()) { c->click(); controlsPage->setSwitch(s, c->isChecked()); } };
     controlsPage->onFanCheck = [this] { runFanCheck(); }; controlsPage->onBiosHelp = [] { QDesktopServices::openUrl(QUrl(msiwmi::supportUrl())); };
@@ -1431,14 +1431,14 @@ void MainWindow::exportFanCurve() {
     }
     if (fans.isEmpty()) return;
     const QString path = QFileDialog::getSaveFileName(this, tr("Export fan curve"), QDir::homePath() + "/fan-curve-" + lastCaps.board + ".json", tr("Fan curve (*.json)")); if (path.isEmpty()) return;
-    QJsonObject o{{"format", "mcontrolcenter-fan-curve"}, {"version", 1}, {"board", lastCaps.board}, {"model", lastCaps.model}, {"fw", lastCaps.fw}, {"fans", fans}};
-    QFile f(path); if (f.open(QIODevice::WriteOnly)) { f.write(QJsonDocument(o).toJson()); if (trayIcon) trayIcon->showMessage("MControlCenter", tr("Fan curve saved to %1").arg(path), QSystemTrayIcon::Information, 5000); }
+    QJsonObject o{{"format", "mcenter-fan-curve"}, {"version", 1}, {"board", lastCaps.board}, {"model", lastCaps.model}, {"fw", lastCaps.fw}, {"fans", fans}};
+    QFile f(path); if (f.open(QIODevice::WriteOnly)) { f.write(QJsonDocument(o).toJson()); if (trayIcon) trayIcon->showMessage("Mcenter", tr("Fan curve saved to %1").arg(path), QSystemTrayIcon::Information, 5000); }
 }
 void MainWindow::importFanCurve() {
     const QString path = QFileDialog::getOpenFileName(this, tr("Import fan curve"), QDir::homePath(), tr("Fan curve (*.json)")); if (path.isEmpty()) return;
     QFile f(path); if (!f.open(QIODevice::ReadOnly) || f.size() > 65536) { QMessageBox::warning(this, tr("Import fan curve"), tr("Could not read that file.")); return; }
     const QJsonObject o = QJsonDocument::fromJson(f.readAll()).object(); const QJsonArray fans = o["fans"].toArray();
-    if (o["format"].toString() != "mcontrolcenter-fan-curve" || fans.isEmpty()) { QMessageBox::warning(this, tr("Import fan curve"), tr("This is not a MControlCenter fan curve file.")); return; }
+    if (o["format"].toString() != "mcenter-fan-curve" || fans.isEmpty()) { QMessageBox::warning(this, tr("Import fan curve"), tr("This is not a Mcenter fan curve file.")); return; }
     QVector<QVector<int>> sps, tps;                                                          // validate EVERYTHING before touching the editor
     for (const QJsonValue &v : fans) {
         const QJsonArray sp = v.toObject()["speeds"].toArray(), tp = v.toObject()["temps"].toArray(); QVector<int> s, t;
@@ -1451,7 +1451,7 @@ void MainWindow::importFanCurve() {
     if (!madeFor.isEmpty() && madeFor != lastCaps.board &&
         QMessageBox::question(this, tr("Import fan curve"), tr("This curve was made for a different laptop (%1, yours is %2). Fan tables are model specific. Load it into the editor anyway? Nothing is applied until you press Apply.").arg(madeFor, lastCaps.board)) != QMessageBox::Yes) return;
     for (int i = 0; i < sps.size() && i < 2; ++i) writeFanToUi(i, sps[i], tps[i]);
-    syncFanEditor(); if (trayIcon) trayIcon->showMessage("MControlCenter", tr("Fan curve loaded into the editor. Review it, then press Apply."), QSystemTrayIcon::Information, 6000);
+    syncFanEditor(); if (trayIcon) trayIcon->showMessage("Mcenter", tr("Fan curve loaded into the editor. Review it, then press Apply."), QSystemTrayIcon::Information, 6000);
 }
 
 void MainWindow::writeFanToUi(int fan, const QVector<int> &sp, const QVector<int> &tp) {
@@ -1460,7 +1460,7 @@ void MainWindow::writeFanToUi(int fan, const QVector<int> &sp, const QVector<int
 }
 
 void MainWindow::setGpuBootMode(bool on) {
-    const QString helper = "/usr/libexec/mcontrolcenter/mcontrolcenter-gpu";
+    const QString helper = "/usr/libexec/mcenter/mcenter-gpu";
     if (!QFile::exists(helper)) { controlsPage->setGpuBusy(tr("The GPU helper is not installed. Re-run install.sh.")); return; }
     controlsPage->setGpuBusy(tr("Applying: rebuilding the boot image. This can take a minute..."));
     auto *pr = new QProcess(this);
@@ -1471,33 +1471,33 @@ void MainWindow::setGpuBootMode(bool on) {
 }
 
 static QString hardwareReport() {
-    QString doctor = "/usr/libexec/mcontrolcenter/mcontrolcenter-doctor"; if (!QFile::exists(doctor)) doctor = QCoreApplication::applicationDirPath() + "/../scripts/mcontrolcenter-doctor";
+    QString doctor = "/usr/libexec/mcenter/mcenter-doctor"; if (!QFile::exists(doctor)) doctor = QCoreApplication::applicationDirPath() + "/../scripts/mcenter-doctor";
     QProcess pr; pr.start(doctor, {"report"}); pr.waitForFinished(8000); return QString::fromUtf8(pr.readAllStandardOutput());
 }
 
 void MainWindow::aboutLink(int w) {
-    static const char *urls[2] = {"https://github.com/p34t1k/MControlCenter", "https://github.com/dmitry-s93/MControlCenter"};
+    static const char *urls[2] = {"https://github.com/p34t1k/Mcenter", "https://github.com/MControlSuite/MControlCenter"};
     if (w < 2) { QDesktopServices::openUrl(QUrl(urls[w])); return; }
     const QString report = hardwareReport(); QGuiApplication::clipboard()->setText(report);
     if (w == 2) {                                                         // open a Hardware-report issue with the report already filled in (kept in the clipboard as a fallback)
-        QString url = "https://github.com/p34t1k/MControlCenter/issues/new?template=hardware-report.yml"; const QByteArray enc = QUrl::toPercentEncoding(report);
+        QString url = "https://github.com/p34t1k/Mcenter/issues/new?template=hardware-report.yml"; const QByteArray enc = QUrl::toPercentEncoding(report);
         if (enc.size() < 6500) url += "&report=" + QString::fromLatin1(enc);
         QDesktopServices::openUrl(QUrl(url)); return;
     }
-    if (trayIcon) trayIcon->showMessage("MControlCenter", tr("Hardware report copied to the clipboard. Paste it into a GitHub issue."), QSystemTrayIcon::Information, 4000);
+    if (trayIcon) trayIcon->showMessage("Mcenter", tr("Hardware report copied to the clipboard. Paste it into a GitHub issue."), QSystemTrayIcon::Information, 4000);
 }
 
 // ───────────────────────────── settings, alerts, automation ─────────────────────────────
-static QString userAutostartFile() { return QDir::homePath() + "/.config/autostart/mcontrolcenter.desktop"; }
+static QString userAutostartFile() { return QDir::homePath() + "/.config/autostart/mcenter.desktop"; }
 static bool autostartEnabled() {
     QFile f(userAutostartFile()); if (f.open(QIODevice::ReadOnly)) return !QString::fromUtf8(f.readAll()).contains("Hidden=true");     // a user file overrides the system one
-    return QFile::exists("/etc/xdg/autostart/mcontrolcenter.desktop");
+    return QFile::exists("/etc/xdg/autostart/mcenter.desktop");
 }
 static void setAutostart(bool on) {
     const QString f = userAutostartFile(); QDir().mkpath(QFileInfo(f).absolutePath());
-    if (on && QFile::exists("/etc/xdg/autostart/mcontrolcenter.desktop")) { QFile::remove(f); return; }              // the system default already starts it
+    if (on && QFile::exists("/etc/xdg/autostart/mcenter.desktop")) { QFile::remove(f); return; }              // the system default already starts it
     QFile out(f); if (!out.open(QIODevice::WriteOnly | QIODevice::Truncate)) return;
-    out.write(on ? "[Desktop Entry]\nType=Application\nName=MControlCenter\nExec=mcontrolcenter\nIcon=mcontrolcenter\n" : "[Desktop Entry]\nType=Application\nName=MControlCenter\nHidden=true\n");
+    out.write(on ? "[Desktop Entry]\nType=Application\nName=Mcenter\nExec=mcenter\nIcon=mcenter\n" : "[Desktop Entry]\nType=Application\nName=Mcenter\nHidden=true\n");
 }
 static const int kThermalLevels[3] = {85, 90, 95};
 
@@ -1523,8 +1523,8 @@ void MainWindow::settingChanged(SettingsPage::Item what, int value) {
         case SettingsPage::AppProfiles: appProfiles->setEnabled(value != 0); break;
         case SettingsPage::AppProfilesEdit: appProfiles->edit(this); break;
         case SettingsPage::ExportCsv: {
-            const QString path = QDir::homePath() + "/mcontrolcenter-telemetry-" + QDateTime::currentDateTime().toString("yyyyMMdd-HHmmss") + ".csv"; QFile f(path);
-            if (f.open(QIODevice::WriteOnly)) { f.write(dashboard->telemetryCsv().toUtf8()); if (trayIcon) trayIcon->showMessage("MControlCenter", tr("Telemetry saved to %1").arg(path), QSystemTrayIcon::Information, 5000); }
+            const QString path = QDir::homePath() + "/mcenter-telemetry-" + QDateTime::currentDateTime().toString("yyyyMMdd-HHmmss") + ".csv"; QFile f(path);
+            if (f.open(QIODevice::WriteOnly)) { f.write(dashboard->telemetryCsv().toUtf8()); if (trayIcon) trayIcon->showMessage("Mcenter", tr("Telemetry saved to %1").arg(path), QSystemTrayIcon::Information, 5000); }
             break; }
     }
     syncSettingsPage();
@@ -1538,17 +1538,17 @@ void MainWindow::thermalWatch(const Snapshot &sn) {
     if (sn.ghz > peakGhz) peakGhz = sn.ghz;
     if (sn.d.cpuTemp >= 92 && peakGhz > 1.0 && sn.ghz > 0 && sn.ghz < 0.65 * peakGhz && trayIcon && QDateTime::currentMSecsSinceEpoch() - lastThrottleMs > 600000) {
         lastThrottleMs = QDateTime::currentMSecsSinceEpoch();
-        trayIcon->showMessage("MControlCenter", tr("The CPU looks thermally throttled: %1 °C and the clock fell to %2 GHz (peak %3 GHz). Cooler Boost, a cooler spot or a lighter load would help.").arg(sn.d.cpuTemp).arg(sn.ghz, 0, 'f', 1).arg(peakGhz, 0, 'f', 1), QSystemTrayIcon::Warning, 10000);
+        trayIcon->showMessage("Mcenter", tr("The CPU looks thermally throttled: %1 °C and the clock fell to %2 GHz (peak %3 GHz). Cooler Boost, a cooler spot or a lighter load would help.").arg(sn.d.cpuTemp).arg(sn.ghz, 0, 'f', 1).arg(peakGhz, 0, 'f', 1), QSystemTrayIcon::Warning, 10000);
     }
     const int level = kThermalLevels[qBound(0, s.getValue("Settings/thermalLevel").toInt(), 2)]; const qint64 now = QDateTime::currentMSecsSinceEpoch();
     if (sn.d.cpuTemp < level) { hotSince = 0; return; }
     if (!hotSince) hotSince = now;
-    if (now - hotSince >= 10000 && now - lastAlertMs > 300000 && trayIcon) { lastAlertMs = now; if (rgbFlashThermal && rgbPresent) QMetaObject::invokeMethod(rgb, "flash", Qt::QueuedConnection, Q_ARG(QColor, QColor(255, 0, 0)), Q_ARG(int, 3), Q_ARG(RgbProfile, rgbEffective())); trayIcon->showMessage("MControlCenter", tr("CPU has been at %1 °C for 10 seconds. Cooler Boost or a quieter workload would help.").arg(sn.d.cpuTemp), QSystemTrayIcon::Warning, 8000); }
+    if (now - hotSince >= 10000 && now - lastAlertMs > 300000 && trayIcon) { lastAlertMs = now; if (rgbFlashThermal && rgbPresent) QMetaObject::invokeMethod(rgb, "flash", Qt::QueuedConnection, Q_ARG(QColor, QColor(255, 0, 0)), Q_ARG(int, 3), Q_ARG(RgbProfile, rgbEffective())); trayIcon->showMessage("Mcenter", tr("CPU has been at %1 °C for 10 seconds. Cooler Boost or a quieter workload would help.").arg(sn.d.cpuTemp), QSystemTrayIcon::Warning, 8000); }
 }
 
 // True while the calibration service is running, and for a minute after its last status write (it restores the charge limit at the end).
 static bool calRunActive() {
-    QFile f("/run/mcontrolcenter/calibration"); if (!f.open(QIODevice::ReadOnly)) return false;
+    QFile f("/run/mcenter/calibration"); if (!f.open(QIODevice::ReadOnly)) return false;
     for (const QByteArray &ln : f.readAll().split('\n')) if (ln.startsWith("ts=")) return QDateTime::currentSecsSinceEpoch() - ln.mid(3).toLongLong() < 60;
     return false;
 }
@@ -1561,7 +1561,7 @@ void MainWindow::limitWatch(const Snapshot &sn) {
     if (calibrating || limitWasCal) { limitWasCal = calibrating; limitSeen = lim; return; }   // calibration and "Restore charger" rewrite the limit themselves: re-baseline when they end
     if (limitSeen > 0 && lim != limitSeen && !calibrating && now - Operate::lastLimitWriteMs() > 15000 && now - lastLimitAlertMs > 600000 && trayIcon) {
         lastLimitAlertMs = now;
-        trayIcon->showMessage("MControlCenter", tr("The battery charge limit changed from %1 % to %2 % without this app doing it (firmware, another OS or another tool). Set it again in the Battery tab if you want %1 %.").arg(limitSeen).arg(lim), QSystemTrayIcon::Warning, 12000);
+        trayIcon->showMessage("Mcenter", tr("The battery charge limit changed from %1 % to %2 % without this app doing it (firmware, another OS or another tool). Set it again in the Battery tab if you want %1 %.").arg(limitSeen).arg(lim), QSystemTrayIcon::Warning, 12000);
     }
     limitSeen = lim;
 }
@@ -1575,10 +1575,10 @@ void MainWindow::gameModeTick() {
     }
     if (clients > 0 && !gameActive) {
         gameActive = true; gameSavedMode = dashData.mode; gameSavedBoost = dashData.coolerBoost; setModeIndex(0); setCoolerBoostState(true);
-        if (trayIcon) trayIcon->showMessage("MControlCenter", tr("Game detected: Turbo + Cooler Boost on."), QSystemTrayIcon::Information, 3000);
+        if (trayIcon) trayIcon->showMessage("Mcenter", tr("Game detected: Turbo + Cooler Boost on."), QSystemTrayIcon::Information, 3000);
     } else if (clients == 0 && gameActive) {
         gameActive = false; if (gameSavedMode >= 0) setModeIndex(gameSavedMode); setCoolerBoostState(gameSavedBoost);
-        if (trayIcon) trayIcon->showMessage("MControlCenter", tr("Game finished: back to your previous mode."), QSystemTrayIcon::Information, 3000);
+        if (trayIcon) trayIcon->showMessage("Mcenter", tr("Game finished: back to your previous mode."), QSystemTrayIcon::Information, 3000);
     }
 }
 
@@ -1667,10 +1667,10 @@ void MainWindow::exerciseAction(int what, int value) {
             auto startManual = [this, now] {                                                  // fallback: MSI: "select Best for Mobility before starting" -> charge to 100 % first
                 exOrigLimit = dashData.chargeLimit > 0 && dashData.chargeLimit <= 100 ? dashData.chargeLimit : 60; exStageAt = now; exWarnedNear = exWarnedLow = false;
                 setChargeLimit(100); exStage = rgbBattery >= 99 ? 2 : 1;
-                if (trayIcon) trayIcon->showMessage("MControlCenter", exStage == 1 ? tr("Calibration step 1 of 2: charging to 100 %. Keep the charger connected; I will tell you when to unplug.") : tr("Calibration step 2 of 2: already full. Unplug the charger and use the laptop normally."), QSystemTrayIcon::Information, 9000);
+                if (trayIcon) trayIcon->showMessage("Mcenter", exStage == 1 ? tr("Calibration step 1 of 2: charging to 100 %. Keep the charger connected; I will tell you when to unplug.") : tr("Calibration step 2 of 2: already full. Unplug the charger and use the laptop normally."), QSystemTrayIcon::Information, 9000);
                 exerciseSave(); batteryPage->setExercise(exerciseView()); };
             // preferred: the root helper does the whole thing hands-free with the charger connected (one password prompt)
-            const QString helper = "/usr/libexec/mcontrolcenter/mcontrolcenter-battery";
+            const QString helper = "/usr/libexec/mcenter/mcenter-battery";
             if (!QFile::exists(helper)) { startManual(); break; }
             {   // The adapter-simulation register was verified on one board only. Anywhere else: say so, and let the user choose the guided manual version instead.
                 static const QStringList verifiedBoards = {"MS-15P4"};
@@ -1688,14 +1688,14 @@ void MainWindow::exerciseAction(int what, int value) {
             connect(exProc, &QProcess::finished, this, [this, startManual](int code, QProcess::ExitStatus) {
                 const QString out = QString::fromUtf8(exProc->readAllStandardOutput()); exProc->deleteLater(); exProc = nullptr;
                 QString reason; for (const QString &l : out.split('\n')) if (l.startsWith("reason=")) reason = l.mid(7);
-                if (code == 0) { exAuto = true; exStage = 1; exAutoMsg.clear(); exerciseSave(); if (trayIcon) trayIcon->showMessage("MControlCenter", tr("Automatic calibration started. Keep the charger connected: it charges to 100 %, then discharges by itself and restores everything."), QSystemTrayIcon::Information, 10000); }
+                if (code == 0) { exAuto = true; exStage = 1; exAutoMsg.clear(); exerciseSave(); if (trayIcon) trayIcon->showMessage("Mcenter", tr("Automatic calibration started. Keep the charger connected: it charges to 100 %, then discharges by itself and restores everything."), QSystemTrayIcon::Information, 10000); }
                 else if (code == 3) startManual();                                            // this laptop cannot simulate an unplug: guided manual version
-                else if (code == 4 && trayIcon) trayIcon->showMessage("MControlCenter", tr("Calibration could not start: %1").arg(reason.isEmpty() ? tr("not possible right now") : reason), QSystemTrayIcon::Warning, 10000);
+                else if (code == 4 && trayIcon) trayIcon->showMessage("Mcenter", tr("Calibration could not start: %1").arg(reason.isEmpty() ? tr("not possible right now") : reason), QSystemTrayIcon::Warning, 10000);
                 batteryPage->setExercise(exerciseView()); });
             exProc->start("pkexec", {helper, "start"});
             break; }
         case 4:
-            if (exAuto) { QProcess::startDetached("pkexec", {"/usr/libexec/mcontrolcenter/mcontrolcenter-battery", "stop"}); }   // the helper restores everything on stop
+            if (exAuto) { QProcess::startDetached("pkexec", {"/usr/libexec/mcenter/mcenter-battery", "stop"}); }   // the helper restores everything on stop
             else if (exStage) { exStage = 0; restore(); }
             break;
     }
@@ -1712,19 +1712,19 @@ void MainWindow::batteryExercise(const Snapshot &sn) {
         for (const HistPoint &q : std::as_const(histPts)) if (q.day <= QDate::currentDate().addDays(-28) && q.day >= QDate::currentDate().addDays(-35) && q.health - h >= 2.0) {
             Settings st; const qint64 last = st.getValue("Notify/healthDrop").toLongLong();
             if (secsNow() - last > 30 * 86400LL) { Settings::setValue("Notify/healthDrop", qlonglong(secsNow()));
-                if (trayIcon) trayIcon->showMessage("MControlCenter", tr("Battery health fell from %1 % to %2 % in a month. That is faster than normal wear: check the Battery tab, keep the charge limit at 60-80 %, and avoid heat.").arg(q.health, 0, 'f', 1).arg(h, 0, 'f', 1), QSystemTrayIcon::Warning, 15000); }
+                if (trayIcon) trayIcon->showMessage("Mcenter", tr("Battery health fell from %1 % to %2 % in a month. That is faster than normal wear: check the Battery tab, keep the charge limit at 60-80 %, and avoid heat.").arg(q.health, 0, 'f', 1).arg(h, 0, 'f', 1), QSystemTrayIcon::Warning, 15000); }
             break; }
     }
     // 1) usage learning: seconds plugged in vs on battery, exponentially forgotten (half-life about a week), saved at most every 5 minutes
     const double dt = exLastTick ? qBound(0.0, double(now - exLastTick), 30.0) : 0; exLastTick = now;
     // 0) automatic calibration: the root helper runs it and publishes its progress; this just mirrors it (and adopts a run started before the app was restarted)
     {
-        QFile f("/run/mcontrolcenter/calibration"); QMap<QString, QString> kv;
+        QFile f("/run/mcenter/calibration"); QMap<QString, QString> kv;
         if (f.open(QIODevice::ReadOnly)) for (const QByteArray &ln : f.readAll().split('\n')) { const int i = ln.indexOf('='); if (i > 0) kv[QString::fromUtf8(ln.left(i))] = QString::fromUtf8(ln.mid(i + 1)); }
         const QString state = kv.value("state"); const qint64 ts = kv.value("ts").toLongLong(); const bool fresh = ts && now - ts < 40;
         const bool active = state == "charging" || state == "discharging" || state == "restoring" || state == "starting";
         // a run that died (crash, power loss, killed service) leaves its saved originals behind: say so loudly and offer the one-click restore
-        const bool orphan = QFile::exists("/var/lib/mcontrolcenter/calibration.orig") && !(active && fresh) && !exProc;
+        const bool orphan = QFile::exists("/var/lib/mcenter/calibration.orig") && !(active && fresh) && !exProc;
         if (orphan != calOrphan) {
             calOrphan = orphan;
             if (orphan) { bannerKind = "restore"; dashboard->setProblem(tr("A battery calibration was interrupted. The charger may still be simulated as unplugged and your charge limit may still be at 100 %. Restore them now."), tr("Restore charger")); }
@@ -1733,9 +1733,9 @@ void MainWindow::batteryExercise(const Snapshot &sn) {
         if (!exAuto && !exProc && !exStage && active && fresh) { exAuto = true; }
         if (exAuto && !exProc) {
             if (active && fresh) { exStage = state == "charging" || state == "starting" ? 1 : 2; exAutoMsg = kv.value("msg"); exAutoEta = kv.value("etatxt"); }
-            else if (active && !fresh) { exAuto = false; exStage = 0; exerciseSave(); if (trayIcon) trayIcon->showMessage("MControlCenter", tr("The calibration service stopped unexpectedly. Your charger state is restored at the next boot at the latest; you can also run: pkexec mcontrolcenter-battery restore"), QSystemTrayIcon::Warning, 12000); }
-            else if (state == "done") { exAuto = false; exStage = 0; exLast = now; exerciseSave(); historyAppend(QString("C,%1,%2,%3,%4").arg(QDate::currentDate().toString(Qt::ISODate), kv.value("endpct"), kv.value("full_before"), kv.value("full_after"))); if (trayIcon) trayIcon->showMessage("MControlCenter", kv.value("msg"), QSystemTrayIcon::Information, 14000); }
-            else if (state == "aborted" || state == "error" || state == "cancelled") { exAuto = false; exStage = 0; exerciseSave(); if (trayIcon) trayIcon->showMessage("MControlCenter", tr("Calibration stopped: %1").arg(kv.value("msg")), QSystemTrayIcon::Warning, 14000); }
+            else if (active && !fresh) { exAuto = false; exStage = 0; exerciseSave(); if (trayIcon) trayIcon->showMessage("Mcenter", tr("The calibration service stopped unexpectedly. Your charger state is restored at the next boot at the latest; you can also run: pkexec mcenter-battery restore"), QSystemTrayIcon::Warning, 12000); }
+            else if (state == "done") { exAuto = false; exStage = 0; exLast = now; exerciseSave(); historyAppend(QString("C,%1,%2,%3,%4").arg(QDate::currentDate().toString(Qt::ISODate), kv.value("endpct"), kv.value("full_before"), kv.value("full_after"))); if (trayIcon) trayIcon->showMessage("Mcenter", kv.value("msg"), QSystemTrayIcon::Information, 14000); }
+            else if (state == "aborted" || state == "error" || state == "cancelled") { exAuto = false; exStage = 0; exerciseSave(); if (trayIcon) trayIcon->showMessage("Mcenter", tr("Calibration stopped: %1").arg(kv.value("msg")), QSystemTrayIcon::Warning, 14000); }
         }
     }
     if (exAuto || exProc) { batteryPage->setRecommended(recommendedLimit()); batteryPage->setExercise(exerciseView()); return; }   // the helper owns the charger now: no manual logic, no usage learning
@@ -1746,23 +1746,23 @@ void MainWindow::batteryExercise(const Snapshot &sn) {
     if (!exEnabled) { batteryPage->setExercise(exerciseView()); return; }
     auto done = [&] {
         exLast = now; exStage = 0; setChargeLimit(exOrigLimit); exerciseSave(); historyAppend(QString("C,%1,%2,0,0").arg(QDate::currentDate().toString(Qt::ISODate)).arg(sn.cap));
-        if (trayIcon) trayIcon->showMessage("MControlCenter", tr("Calibration complete: the battery reached %1 %. Plug the charger in; it recharges to your normal %2 % limit.").arg(sn.cap).arg(exOrigLimit), QSystemTrayIcon::Information, 12000); };
+        if (trayIcon) trayIcon->showMessage("Mcenter", tr("Calibration complete: the battery reached %1 %. Plug the charger in; it recharges to your normal %2 % limit.").arg(sn.cap).arg(exOrigLimit), QSystemTrayIcon::Information, 12000); };
     if (exStage == 1) {
-        if (sn.cap >= 99 || sn.status == "Full") { exStage = 2; exStageAt = now; exerciseSave(); if (trayIcon) trayIcon->showMessage("MControlCenter", tr("Fully charged. Calibration step 2 of 2: unplug the charger and use the laptop normally. I will tell you at %1 %.").arg(kCalTarget), QSystemTrayIcon::Information, 12000); }
+        if (sn.cap >= 99 || sn.status == "Full") { exStage = 2; exStageAt = now; exerciseSave(); if (trayIcon) trayIcon->showMessage("Mcenter", tr("Fully charged. Calibration step 2 of 2: unplug the charger and use the laptop normally. I will tell you at %1 %.").arg(kCalTarget), QSystemTrayIcon::Information, 12000); }
         else if (onBat && sn.cap >= 90) { exStage = 2; exStageAt = now; exerciseSave(); }                        // you already unplugged near full: go straight on
         else if (now - exStageAt > 24 * 3600LL) { exStage = 0; setChargeLimit(exOrigLimit); exerciseSave(); }   // never reached 100 % within a day: stand down, give the limit back
     } else if (exStage == 2) {
         if (onBat && sn.cap <= kCalTarget) done();
-        else if (onBat && sn.cap <= kCalTarget + 8 && !exWarnedNear) { exWarnedNear = true; if (trayIcon) trayIcon->showMessage("MControlCenter", tr("Almost there: %1 %. Keep going to %2 %.").arg(sn.cap).arg(kCalTarget), QSystemTrayIcon::Information, 6000); }
+        else if (onBat && sn.cap <= kCalTarget + 8 && !exWarnedNear) { exWarnedNear = true; if (trayIcon) trayIcon->showMessage("Mcenter", tr("Almost there: %1 %. Keep going to %2 %.").arg(sn.cap).arg(kCalTarget), QSystemTrayIcon::Information, 6000); }
         else if (now - exStageAt > 7 * 86400LL) { exStage = 0; setChargeLimit(exOrigLimit); exerciseSave(); }   // abandoned for a week: stand down
     } else if (onBat && sn.cap <= kCalTarget && now - exLast > 6 * 3600LL) {                                 // you ran it down on your own: that counts too
         done();
     }
-    if (onBat && sn.cap <= 15 && !exWarnedLow) { exWarnedLow = true; if (trayIcon) trayIcon->showMessage("MControlCenter", tr("Battery at %1 %: plug the charger in now.").arg(sn.cap), QSystemTrayIcon::Warning, 10000); }
+    if (onBat && sn.cap <= 15 && !exWarnedLow) { exWarnedLow = true; if (trayIcon) trayIcon->showMessage("Mcenter", tr("Battery at %1 %: plug the charger in now.").arg(sn.cap), QSystemTrayIcon::Warning, 10000); }
     else if (!onBat) exWarnedLow = false;
     const qint64 base = exLast ? exLast : exSince;
     if (!exStage && now >= base + calIntervalDays() * 86400LL && sn.ac && now - exLastNotify > 86400) {                // overdue: one gentle reminder a day, only while plugged in
-        exLastNotify = now; if (trayIcon) trayIcon->showMessage("MControlCenter", tr("Battery calibration is due (MSI recommends it %1). Open Battery > Start calibration when it suits you.").arg(calIntervalDays() == 90 ? tr("every 3 months when mostly plugged in") : tr("monthly when you use the battery a lot")), QSystemTrayIcon::Information, 10000);
+        exLastNotify = now; if (trayIcon) trayIcon->showMessage("Mcenter", tr("Battery calibration is due (MSI recommends it %1). Open Battery > Start calibration when it suits you.").arg(calIntervalDays() == 90 ? tr("every 3 months when mostly plugged in") : tr("monthly when you use the battery a lot")), QSystemTrayIcon::Information, 10000);
     }
     batteryPage->setExercise(exerciseView());
 }
@@ -1815,7 +1815,7 @@ void MainWindow::fanCheckPoll() {
 void MainWindow::firstRunNotice() {
     if (Settings().getValue("Legal/accepted").toString() == "1") return;
     QMessageBox box(this); box.setIcon(QMessageBox::Warning); box.setWindowTitle(tr("Before you start"));
-    box.setText(tr("MControlCenter is an unofficial community project. It is not made, endorsed or supported by MSI."));
+    box.setText(tr("Mcenter is an unofficial community project. It is not made, endorsed or supported by MSI."));
     box.setInformativeText(tr("It is still in testing and changes real hardware settings (fans, charge limit, battery calibration, keyboard lighting, panel options). It is provided \"as is\", without any warranty, under the GPL-3.0 licence. The authors and contributors are not responsible for any damage, data loss, or warranty problems. You use it entirely at your own risk.\n\nIf you are unsure about a feature, leave it alone."));
     QPushButton *ok = box.addButton(tr("I understand, continue"), QMessageBox::AcceptRole); QPushButton *quit = box.addButton(tr("Quit"), QMessageBox::RejectRole); box.setDefaultButton(quit);
     box.exec();

@@ -1,20 +1,20 @@
 #!/bin/bash
-# mcontrolcenter-doctor - keeps the msi-ec kernel driver working on MSI laptops, across kernel updates and distros.
+# mcenter-doctor - keeps the msi-ec kernel driver working on MSI laptops, across kernel updates and distros.
 #
-#   mcontrolcenter-doctor status [--json]   what is wrong (no root needed)
-#   mcontrolcenter-doctor fix    [--quiet]   install headers/DKMS/source as needed, build msi-ec for the RUNNING kernel, load it (root)
-#   mcontrolcenter-doctor report             markdown hardware report to paste into a GitHub issue (no serials / personal data)
-#   mcontrolcenter-doctor boot               same as `fix --quiet`, but does nothing unless something is actually broken (used by the systemd unit)
+#   mcenter-doctor status [--json]   what is wrong (no root needed)
+#   mcenter-doctor fix    [--quiet]   install headers/DKMS/source as needed, build msi-ec for the RUNNING kernel, load it (root)
+#   mcenter-doctor report             markdown hardware report to paste into a GitHub issue (no serials / personal data)
+#   mcenter-doctor boot               same as `fix --quiet`, but does nothing unless something is actually broken (used by the systemd unit)
 #
 # Why it exists: msi-ec is an out-of-tree driver built by DKMS. After a kernel update DKMS can only rebuild it if the matching
 # kernel headers are installed. This script makes sure they are (and that future kernels bring theirs), builds the module,
 # loads it, and persists the load across boots. It never touches anything on a non-MSI machine.
 set -u
-MSIEC_GIT="${MSIEC_GIT:-https://github.com/BeardOverflow/msi-ec.git}"
+MSIEC_GIT="${MSIEC_GIT:-https://github.com/MControlSuite/msi-ec.git}"
 KVER="$(uname -r)"
 QUIET=0; JSON=0; CMD="${1:-status}"; shift || true
 for a in "$@"; do case "$a" in --quiet) QUIET=1 ;; --json) JSON=1 ;; esac; done
-log() { [ "$QUIET" = 1 ] || echo "[doctor] $*" >&2; logger -t mcontrolcenter-doctor -- "$*" 2>/dev/null || true; }
+log() { [ "$QUIET" = 1 ] || echo "[doctor] $*" >&2; logger -t mcenter-doctor -- "$*" 2>/dev/null || true; }
 
 vendor_ok() { grep -qiE 'micro-star|msi' /sys/class/dmi/id/sys_vendor 2>/dev/null; }
 fw_string() { cat /sys/devices/platform/msi-ec/fw_version 2>/dev/null || journalctl -k -b --no-pager 2>/dev/null | grep -o "Firmware version is not supported: '[^']*'" | tail -1 | sed "s/.*: '//; s/'//"; }
@@ -32,7 +32,7 @@ state() {
     [ -n "$(dkms_version)" ] || { echo no-source; return; }
     headers_ok || { echo no-headers; return; }
     dkms_built || { echo not-built; return; }
-    local rec; rec="$(cat /var/lib/mcontrolcenter/state 2>/dev/null)"           # written by `fix` after a real failed attempt on this kernel
+    local rec; rec="$(cat /var/lib/mcenter/state 2>/dev/null)"           # written by `fix` after a real failed attempt on this kernel
     case "$rec" in "secureboot $KVER") echo secureboot; return ;; "unsupported-firmware $KVER") echo unsupported-firmware; return ;; esac
     echo not-loaded                # built for this kernel, simply not loaded yet: `fix` will modprobe it
 }
@@ -113,10 +113,10 @@ cmd_fix() {
         log "driver did not bind; trying the newest upstream msi-ec source"
         nv="$(register_source)" && [ -n "$nv" ] && dkms install "msi-ec/$nv" -k "$KVER" --force 2>&1 | tail -2 >&2 && { modprobe -r msi-ec 2>/dev/null; modprobe msi-ec 2>/dev/null; }
     fi
-    mkdir -p /etc/modules-load.d /var/lib/mcontrolcenter; echo msi-ec > /etc/modules-load.d/msi-ec.conf
-    if loaded; then rm -f /var/lib/mcontrolcenter/state; log "OK: msi-ec active ($(fw_string))"; exit 0; fi
-    if modprobe msi-ec 2>&1 | grep -qi "key was rejected"; then echo "secureboot $KVER" > /var/lib/mcontrolcenter/state
-    elif dmesg 2>/dev/null | tail -50 | grep -q "Firmware version is not supported"; then echo "unsupported-firmware $KVER" > /var/lib/mcontrolcenter/state; fi
+    mkdir -p /etc/modules-load.d /var/lib/mcenter; echo msi-ec > /etc/modules-load.d/msi-ec.conf
+    if loaded; then rm -f /var/lib/mcenter/state; log "OK: msi-ec active ($(fw_string))"; exit 0; fi
+    if modprobe msi-ec 2>&1 | grep -qi "key was rejected"; then echo "secureboot $KVER" > /var/lib/mcenter/state
+    elif dmesg 2>/dev/null | tail -50 | grep -q "Firmware version is not supported"; then echo "unsupported-firmware $KVER" > /var/lib/mcenter/state; fi
     log "msi-ec still not active: state=$(state) firmware=$(fw_string). If the firmware is unsupported, report it at https://github.com/BeardOverflow/msi-ec/issues"
     exit 5
 }
@@ -124,7 +124,7 @@ cmd_fix() {
 cmd_boot() {   # cheap no-op when healthy, so it is safe to run at every boot
     vendor_ok || exit 0
     loaded && exit 0
-    QUIET=1; case "$(state)" in unsupported-firmware|secureboot) log "state=$(state): needs a human (see mcontrolcenter-doctor status)"; exit 0 ;; esac
+    QUIET=1; case "$(state)" in unsupported-firmware|secureboot) log "state=$(state): needs a human (see mcenter-doctor status)"; exit 0 ;; esac
     # give the network a moment (headers may need downloading right after a kernel update)
     for _ in 1 2 3 4 5 6; do getent hosts github.com >/dev/null 2>&1 && break; sleep 5; done
     cmd_fix
@@ -132,7 +132,7 @@ cmd_boot() {   # cheap no-op when healthy, so it is safe to run at every boot
 
 cmd_report() {   # markdown hardware report for GitHub issues. Contains NO serial numbers, UUIDs, MACs, hostname or user name.
     local e=/sys/devices/platform/msi-ec d=/sys/class/dmi/id
-    echo "### MControlCenter hardware report"
+    echo "### Mcenter hardware report"
     echo '```'
     echo "model:        $(cat $d/sys_vendor 2>/dev/null) $(cat $d/product_name 2>/dev/null)"
     echo "board:        $(cat $d/board_name 2>/dev/null)"

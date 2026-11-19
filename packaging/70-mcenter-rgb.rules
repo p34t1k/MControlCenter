@@ -1,4 +1,4 @@
-# MControlCenter: let the logged-in user talk to MSI MysticLight keyboard controllers (USB 1462:16xx / 0db0:16xx) without root.
+# Mcenter: let the logged-in user talk to MSI MysticLight keyboard controllers (USB 1462:16xx / 0db0:16xx) without root.
 # Motherboard/desktop controllers (7Bxx and up) are deliberately not matched.
 KERNEL=="hidraw*", ATTRS{idVendor}=="1462", ATTRS{idProduct}=="16[0-9][0-9]", TAG+="uaccess"
 KERNEL=="hidraw*", ATTRS{idVendor}=="0db0", ATTRS{idProduct}=="16[0-9][0-9]", TAG+="uaccess"

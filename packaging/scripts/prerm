@@ -3,7 +3,7 @@
 case "$1" in
     remove|0)
         # never leave a calibration half done
-        [ -x /usr/libexec/mcontrolcenter/mcontrolcenter-battery ] && /usr/libexec/mcontrolcenter/mcontrolcenter-battery restore >/dev/null 2>&1 || true
-        systemctl disable mcontrolcenter-doctor.service mcontrolcenter-battery.service >/dev/null 2>&1 || true ;;
+        [ -x /usr/libexec/mcenter/mcenter-battery ] && /usr/libexec/mcenter/mcenter-battery restore >/dev/null 2>&1 || true
+        systemctl disable mcenter-doctor.service mcenter-battery.service >/dev/null 2>&1 || true ;;
 esac
 exit 0

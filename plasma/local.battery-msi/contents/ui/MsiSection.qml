@@ -1,5 +1,5 @@
 /*  MSI section of the Power & Battery popup: live thermals, fans, performance mode, Cooler Boost, dGPU state and charge limit.
-    Same visual language as the MControlCenter app (chamfered shapes, segmented meters, one accent that follows the mode),
+    Same visual language as the Mcenter app (chamfered shapes, segmented meters, one accent that follows the mode),
     but text and surfaces use the Plasma colour scheme so it sits properly in any Plasma theme. */
 import QtQuick
 import QtQuick.Layouts

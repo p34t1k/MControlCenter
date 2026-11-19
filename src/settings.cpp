@@ -1,26 +1,52 @@
 /* Copyright (C) 2022  Dmitry Serov
  *
- * This file is part of MControlCenter.
+ * This file is part of Mcenter.
  *
- * MControlCenter is free software: you can redistribute it and/or
+ * Mcenter is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of
  * the License, or (at your option) any later version.
  *
- * MControlCenter is distributed in the hope that it will be useful,
+ * Mcenter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with MControlCenter. If not, see <https://www.gnu.org/licenses/>.
+ * with Mcenter. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include <QSettings>
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
 #include <sstream>
 #include "settings.h"
 
-QSettings settings("MControlCenter");
+// One-time migration from the pre-rename name (MControlCenter): runs before the QSettings below is constructed.
+static bool migrateLegacyUserData() {
+    const QString home = QDir::homePath();
+    auto xdg = [&](const char *env, const char *fallback) { const QByteArray v = qgetenv(env); return v.isEmpty() ? home + fallback : QString::fromLocal8Bit(v); };
+    const QString conf = xdg("XDG_CONFIG_HOME", "/.config"), data = xdg("XDG_DATA_HOME", "/.local/share"), cache = xdg("XDG_CACHE_HOME", "/.cache");
+    auto move = [](const QString &from, const QString &to) { if (QFileInfo::exists(from) && !QFileInfo::exists(to)) QDir().rename(from, to); };
+    move(conf + "/MControlCenter.conf", conf + "/Mcenter.conf");
+    move(data + "/mcontrolcenter", data + "/mcenter");
+    move(cache + "/mcontrolcenter", cache + "/mcenter");
+    const QString oldAuto = conf + "/autostart/mcontrolcenter.desktop", newAuto = conf + "/autostart/mcenter.desktop";
+    if (QFileInfo::exists(oldAuto)) {
+        QFile f(oldAuto);
+        if (!QFileInfo::exists(newAuto) && f.open(QIODevice::ReadOnly)) {
+            QByteArray b = f.readAll(); f.close();
+            b.replace("MControlCenter", "Mcenter").replace("mcontrolcenter", "mcenter");
+            QFile o(newAuto); if (o.open(QIODevice::WriteOnly)) o.write(b);
+        }
+        QFile::remove(oldAuto);
+    }
+    return true;
+}
+static const bool legacyMigrated = migrateLegacyUserData();
+
+QSettings settings("Mcenter");
 
 QVariant Settings::getValue(const QString &key) {
     return settings.value(key);

@@ -6,12 +6,12 @@ udevadm trigger --subsystem-match=i2c-dev >/dev/null 2>&1 || true
 modprobe i2c-dev >/dev/null 2>&1 || true
 systemctl daemon-reload >/dev/null 2>&1 || true
 systemctl reload dbus >/dev/null 2>&1 || true
-systemctl enable mcontrolcenter-doctor.service mcontrolcenter-battery.service >/dev/null 2>&1 || true
+systemctl enable mcenter-doctor.service mcenter-battery.service >/dev/null 2>&1 || true
 # MSI WMI driver for automatic battery calibration: only where the kernel does not ship it and this is an MSI laptop
 if grep -qiE 'micro-star|msi' /sys/class/dmi/id/sys_vendor 2>/dev/null && ! modinfo msi-wmi-platform >/dev/null 2>&1 && command -v dkms >/dev/null 2>&1; then
     dkms add msi-wmi-platform/1.0 >/dev/null 2>&1 || true
-    dkms install msi-wmi-platform/1.0 >/dev/null 2>&1 || echo "mcontrolcenter: msi-wmi-platform did not build (needs kernel headers); battery calibration will use the guided manual version" >&2
+    dkms install msi-wmi-platform/1.0 >/dev/null 2>&1 || echo "mcenter: msi-wmi-platform did not build (needs kernel headers); battery calibration will use the guided manual version" >&2
 fi
 # build / load the msi-ec driver now (needs network + headers; the boot service retries after every kernel update)
-if grep -qiE 'micro-star|msi' /sys/class/dmi/id/sys_vendor 2>/dev/null; then systemctl start --no-block mcontrolcenter-doctor.service >/dev/null 2>&1 || true; fi
+if grep -qiE 'micro-star|msi' /sys/class/dmi/id/sys_vendor 2>/dev/null; then systemctl start --no-block mcenter-doctor.service >/dev/null 2>&1 || true; fi
 exit 0

@@ -1,4 +1,4 @@
-// Dashboard page for MControlCenter. Telemetry-panel look: chamfered panels, hairlines, LED-style segmented meters,
+// Dashboard page for Mcenter. Telemetry-panel look: chamfered panels, hairlines, LED-style segmented meters,
 // one accent colour that follows the power mode. Everything is capability-driven so it adapts to other MSI laptops.
 #ifndef DASHBOARD_H
 #define DASHBOARD_H

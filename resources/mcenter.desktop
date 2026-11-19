@@ -1,7 +1,7 @@
 [Desktop Entry]
 Categories=System;Settings;Utility;
 Encoding=UTF-8
-Name=MControlCenter
+Name=Mcenter
 GenericName=Change MSI Laptop Settings
 GenericName[ru]=Изменение настроек ноутбука MSI
 GenericName[pt]=Alterar Definições de Portáteis MSI
@@ -18,5 +18,5 @@ GenericName[nl_NL]=Wijzig de instellingen van de MSI Laptop
 GenericName[eu]=Aldatu MSI eramangarrien doikuntzak
 GenericName[vi]=Thay đổi cài đặt máy tính xách tay MSI
 Type=Application
-Exec=mcontrolcenter
-Icon=mcontrolcenter
+Exec=mcenter
+Icon=mcenter

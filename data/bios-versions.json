@@ -1,5 +1,5 @@
 {
-  "_comment": "Community-maintained, best-effort list of MSI laptop BIOS versions, for MControlCenter's 'a newer BIOS might unlock more features' hint. NOT from MSI, NOT official, NOT guaranteed current or accurate. Add an entry only from MSI's own support page for that exact model (Drivers & Downloads -> BIOS tab); include the date and the exact support URL you used. The app compares this purely informationally and never auto-updates anything.",
+  "_comment": "Community-maintained, best-effort list of MSI laptop BIOS versions, for Mcenter's 'a newer BIOS might unlock more features' hint. NOT from MSI, NOT official, NOT guaranteed current or accurate. Add an entry only from MSI's own support page for that exact model (Drivers & Downloads -> BIOS tab); include the date and the exact support URL you used. The app compares this purely informationally and never auto-updates anything.",
   "schema": 1,
   "boards": [
     {

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+  <id>mcenter</id>
+  <metadata_license>CC0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <name>Mcenter</name>
+  <summary>Application for changing the settings of MSI laptops</summary>
+  <description>
+    <p>Mcenter is a Free and Open Source GNU/Linux application
+       that allows you to change the settings of MSI laptops.</p>
+  </description>
+  <provides>
+    <binary>mcenter</binary>
+  </provides>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://github.com/p34t1k/Mcenter/raw/main/docs/screenshots/dashboard.png</image>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/p34t1k/Mcenter/raw/main/docs/screenshots/controls.png</image>
+    </screenshot>
+  </screenshots>
+  <developer_name>p34t1k</developer_name>
+  <url type="homepage">https://github.com/p34t1k/Mcenter</url>
+  <url type="bugtracker">https://github.com/p34t1k/Mcenter/issues</url>
+  <url type="translate">https://github.com/p34t1k/Mcenter/tree/main/src/i18n</url>
+</component>

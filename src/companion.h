@@ -20,7 +20,7 @@ public:
     void notify(const QString &text, double seconds = 6.0);   // a one-off message pushed in from outside (e.g. a BIOS-update hint), bypassing the mood cooldown
     void setStats(const QString &line);   // live "72C . 2944rpm . 82%" summary MainWindow keeps current; shown on click instead of a canned tip
     void placeRemembered();         // restores the saved screen position, or a sensible default
-    std::function<void()> onActivate;      // double-click, or the menu's "Open MControlCenter": raise the main window
+    std::function<void()> onActivate;      // double-click, or the menu's "Open Mcenter": raise the main window
     std::function<void()> onToggleBoost;   // menu's "Toggle Cooler Boost": a real action, not just decoration
 protected:
     void paintEvent(QPaintEvent *) override;

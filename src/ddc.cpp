@@ -70,7 +70,7 @@ QString busAccessHint(int bus) {
     const QByteArray p = QString("/dev/i2c-%1").arg(bus).toLocal8Bit();
     if (::access(p.constData(), R_OK | W_OK) == 0) return {};
     if (::access(p.constData(), F_OK) != 0) return "the i2c-dev kernel module is not loaded (sudo modprobe i2c-dev)";
-    return "no permission for /dev/i2c-" + QString::number(bus) + " (reinstall MControlCenter so the udev rule is installed, then re-plug the monitor)";
+    return "no permission for /dev/i2c-" + QString::number(bus) + " (reinstall Mcenter so the udev rule is installed, then re-plug the monitor)";
 }
 
 QString connectorsSignature() {

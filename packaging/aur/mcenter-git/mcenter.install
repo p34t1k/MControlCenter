@@ -6,22 +6,22 @@ post_install() {
     modprobe i2c-dev >/dev/null 2>&1 || true
     systemctl daemon-reload >/dev/null 2>&1 || true
     systemctl reload dbus >/dev/null 2>&1 || true
-    systemctl enable mcontrolcenter-doctor.service mcontrolcenter-battery.service >/dev/null 2>&1 || true
+    systemctl enable mcenter-doctor.service mcenter-battery.service >/dev/null 2>&1 || true
     # MSI WMI driver for automatic battery calibration: only where the kernel does not ship it and this is an MSI laptop
     if grep -qiE 'micro-star|msi' /sys/class/dmi/id/sys_vendor 2>/dev/null && ! modinfo msi-wmi-platform >/dev/null 2>&1 && command -v dkms >/dev/null 2>&1; then
         dkms add msi-wmi-platform/1.0 >/dev/null 2>&1 || true
-        dkms install msi-wmi-platform/1.0 >/dev/null 2>&1 || echo "mcontrolcenter: msi-wmi-platform did not build (needs kernel headers); battery calibration will use the guided manual version" >&2
+        dkms install msi-wmi-platform/1.0 >/dev/null 2>&1 || echo "mcenter: msi-wmi-platform did not build (needs kernel headers); battery calibration will use the guided manual version" >&2
     fi
     # msi-ec driver: the boot service builds/loads it (needs headers; it retries after every kernel update)
-    if grep -qiE 'micro-star|msi' /sys/class/dmi/id/sys_vendor 2>/dev/null; then systemctl start --no-block mcontrolcenter-doctor.service >/dev/null 2>&1 || true; fi
-    echo "mcontrolcenter: start it from the application menu (it lives in the system tray)."
-    echo "mcontrolcenter: the msi-ec driver comes from your kernel or from the msi-ec-dkms AUR package; check with: /usr/libexec/mcontrolcenter/mcontrolcenter-doctor status"
+    if grep -qiE 'micro-star|msi' /sys/class/dmi/id/sys_vendor 2>/dev/null; then systemctl start --no-block mcenter-doctor.service >/dev/null 2>&1 || true; fi
+    echo "mcenter: start it from the application menu (it lives in the system tray)."
+    echo "mcenter: the msi-ec driver comes from your kernel or from the msi-ec-dkms AUR package; check with: /usr/libexec/mcenter/mcenter-doctor status"
 }
 post_upgrade() { post_install; }
 pre_remove() {
     # never leave a calibration half done
-    [ -x /usr/libexec/mcontrolcenter/mcontrolcenter-battery ] && /usr/libexec/mcontrolcenter/mcontrolcenter-battery restore >/dev/null 2>&1 || true
-    systemctl disable mcontrolcenter-doctor.service mcontrolcenter-battery.service >/dev/null 2>&1 || true
+    [ -x /usr/libexec/mcenter/mcenter-battery ] && /usr/libexec/mcenter/mcenter-battery restore >/dev/null 2>&1 || true
+    systemctl disable mcenter-doctor.service mcenter-battery.service >/dev/null 2>&1 || true
 }
 post_remove() {
     systemctl daemon-reload >/dev/null 2>&1 || true

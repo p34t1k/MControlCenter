@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN" "http://www.freedesktop.org/standards/PolicyKit/1.0/policyconfig.dtd">
 <policyconfig>
-  <vendor>MControlCenter</vendor>
-  <action id="io.github.dmitry_s93.mcontrolcenter.gpu">
+  <vendor>Mcenter</vendor>
+  <action id="io.github.p34t1k.mcenter.gpu">
     <description>Change the discrete GPU boot mode</description>
     <message>Authentication is required to change whether the discrete GPU is powered at boot</message>
     <defaults><allow_any>auth_admin</allow_any><allow_inactive>auth_admin</allow_inactive><allow_active>auth_admin_keep</allow_active></defaults>
-    <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/mcontrolcenter/mcontrolcenter-gpu</annotate>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/mcenter/mcenter-gpu</annotate>
   </action>
 </policyconfig>

@@ -1,29 +1,35 @@
 # Maintainer: p34t1k <https://github.com/p34t1k>
-pkgname=mcontrolcenter
-pkgver=0.6.0
+pkgname=mcenter-git
+pkgver=0.6.0.r0.g0000000
 pkgrel=1
-pkgdesc='Control center for MSI laptops: power modes, fans, charge limit and battery calibration, keyboard lighting, displays (unofficial, community project)'
+pkgdesc='Control center for MSI laptops: power modes, fans, charge limit and battery calibration, keyboard lighting, displays (unofficial, development version)'
 arch=('x86_64')
-url='https://github.com/p34t1k/MControlCenter'
+url='https://github.com/p34t1k/Mcenter'
 license=('GPL-3.0-or-later')
 depends=('qt6-base' 'polkit' 'hicolor-icon-theme')
-makedepends=('cmake' 'qt6-tools')
+makedepends=('git' 'cmake' 'qt6-tools')
 optdepends=('msi-ec-dkms: msi-ec kernel driver if your kernel does not provide it (AUR)'
             'dkms: builds msi-wmi-platform for automatic battery calibration on kernels without it'
             'linux-headers: needed by dkms'
             'gamemode: auto Turbo + Cooler Boost while a game runs'
             'libkscreen: refresh-rate control on KDE (kscreen-doctor)'
             'xorg-xrandr: refresh-rate control on X11 desktops')
-conflicts=('mcontrolcenter-git')
-install=mcontrolcenter.install
-source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
-sha256sums=('736316ac9ac837eeb9595078fddb7832c22c40644089854273559ca2720235c8')
+provides=('mcenter')
+conflicts=('mcenter')
+install=mcenter.install
+source=("$pkgname::git+$url.git")
+sha256sums=('SKIP')
+
+pkgver() {
+    cd "$pkgname"
+    git describe --long --tags --match 'v*' 2>/dev/null | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g' || printf '0.6.0.r%s.g%s' "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
 
 build() {
-    cmake -B build -S "MControlCenter-$pkgver" \
+    cmake -B build -S "$pkgname" \
         -DCMAKE_BUILD_TYPE=None \
         -DCMAKE_INSTALL_PREFIX=/usr \
-        -DRELEASE_VERSION="$pkgver"
+        -DRELEASE_VERSION="${pkgver%%.r*}"
     cmake --build build
 }
 

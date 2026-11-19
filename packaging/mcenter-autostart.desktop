@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
-Name=MControlCenter
+Name=Mcenter
 Comment=MSI laptop control (tray)
-Exec=mcontrolcenter
-Icon=mcontrolcenter
+Exec=mcenter
+Icon=mcenter
 X-GNOME-Autostart-enabled=true

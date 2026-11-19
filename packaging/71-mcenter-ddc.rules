@@ -1,4 +1,4 @@
-# MControlCenter: let the logged-in desktop user talk DDC/CI to external monitors (brightness, input, colour...).
+# Mcenter: let the logged-in desktop user talk DDC/CI to external monitors (brightness, input, colour...).
 # Only the I2C buses that belong to GRAPHICS adapters are opened up (Intel gmbus/AUX, NVIDIA, AMD, DisplayPort MST); the SMBus, the touchpad
 # bus and every other I2C device stay root-only. The app only ever addresses the monitor's DDC address 0x37.
 SUBSYSTEM=="i2c-dev", ATTR{name}=="i915 gmbus*|AUX *|NVIDIA i2c*|AMDGPU*|*DPMST*|*DP-[0-9]*|*HDMI-A-[0-9]*|*DVI-*|*USB-C*", TAG+="uaccess"

@@ -329,12 +329,12 @@ AboutPage::AboutPage(QWidget *p) : AnimPage(p) {
     root->addLayout(left, 3); root->addLayout(right, 2); adopt(credits, 0.0); adopt(system, 0.1); adopt(links, 0.2);
     auto text = [&](const QString &t, bool acc = false) { Row r; r.type = Row::Text; r.label = t; r.accent = acc; credits->rows.push_back(r); };
     auto gap = [&] { Row r; r.type = Row::Gap; credits->rows.push_back(r); };
-    text("MCONTROLCENTER · OPEN-SOURCE FORK", true);
+    text("MCENTER · OPEN-SOURCE FORK", true);
     text("Maintained by p34t1k (github.com/p34t1k). Adds the telemetry dashboard and redesigned interface, capability-aware UI for any msi-ec laptop, self-healing msi-ec driver setup after kernel updates, discrete-GPU boot mode, KDE Power & Battery integration and the session D-Bus API.");
     gap(); text("ORIGINAL APPLICATION", true);
     text("By Dmitry Serov (dmitry-s93) and contributors: the EC access layer, fan control, power-profile sync and the first versions of every feature here. Licensed GPL-3.0-or-later. This fork keeps the same licence.");
     gap(); text("KERNEL DRIVER", true);
-    text("msi-ec by BeardOverflow and contributors (github.com/BeardOverflow/msi-ec) is what makes all of this possible.");
+    text("msi-ec by BeardOverflow and contributors, now maintained at github.com/MControlSuite/msi-ec (originally BeardOverflow/msi-ec) is what makes all of this possible.");
     gap(); text("KEYBOARD LIGHTING PROTOCOL", true);
     text("MSI MysticLight reverse engineering by natanalt, and the community projects mystickeys, msi-mysticlight-controller-linux and OpenRGB, whose published findings this independent implementation builds on.");
     gap(); text("BATTERY GUIDANCE", true);
@@ -360,7 +360,7 @@ SettingsPage::SettingsPage(QWidget *p) : AnimPage(p) {
     { Row x; x.type = Row::Switch; x.label = "Thermal alerts"; x.sub = "Notify me when the CPU stays hot or throttles"; x.click = [this] { if (onChange) onChange(ThermalAlert, startup->rows[1].on ? 0 : 1); }; startup->rows.push_back(x); }
     { Row x; x.type = Row::Segment; x.label = "Alert above"; x.opts = {"85 °C", "90 °C", "95 °C"}; x.visible = false; x.pick = [this](int i) { if (onChange) onChange(ThermalLevel, i); }; startup->rows.push_back(x); }
     { Row x; x.type = Row::Switch; x.label = "Reduce motion"; x.sub = "No entrance or hover animations (calmer, and a little less CPU)"; x.click = [this] { if (onChange) onChange(ReduceMotion, startup->rows[3].on ? 0 : 1); }; startup->rows.push_back(x); }
-    { Row x; x.type = Row::Text; x.label = "Launching MControlCenter again from the menu simply raises this window."; startup->rows.push_back(x); }
+    { Row x; x.type = Row::Text; x.label = "Launching Mcenter again from the menu simply raises this window."; startup->rows.push_back(x); }
     startup->relayout();
     { Row x; x.type = Row::Switch; x.label = "Turbo while gaming"; x.sub = "Turbo + Cooler Boost while a game runs (Feral GameMode)"; x.click = [this] { if (onChange) onChange(GameMode, automation->rows[0].on ? 0 : 1); }; automation->rows.push_back(x); }
     { Row x; x.type = Row::Text; x.label = "Needs the 'gamemode' package (many launchers use it automatically). Nothing changes until a game actually requests it."; automation->rows.push_back(x); }

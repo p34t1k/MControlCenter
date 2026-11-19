@@ -1,4 +1,4 @@
-// Live state of MControlCenter (session D-Bus /Control). One instance in main.qml; polls slowly while the popup is closed, quickly while it is open.
+// Live state of Mcenter (session D-Bus /Control). One instance in main.qml; polls slowly while the popup is closed, quickly while it is open.
 import QtQuick
 import org.kde.plasma.plasma5support as P5Support
 
@@ -13,7 +13,7 @@ Item {
     readonly property var modeColors: ["#ff4b1f", "#e7e0cd", "#6eaad7", "#96cd5a"]
     readonly property int modeIndex: online ? modeKeys.indexOf(st.mode) : -1
     readonly property color accent: modeIndex >= 0 ? modeColors[modeIndex] : "#e7e0cd"
-    readonly property string bus: "gdbus call --session -d io.github.dmitry_s93.MControlCenter -o /Control -m io.github.dmitry_s93.MControlCenter.Control."
+    readonly property string bus: "gdbus call --session -d io.github.p34t1k.Mcenter -o /Control -m io.github.p34t1k.Mcenter.Control."
 
     function call(method, arg) { exec.connectSource(bus + method + (arg !== undefined ? " " + arg : "")) }
     function refresh() { exec.connectSource(bus + "State") }

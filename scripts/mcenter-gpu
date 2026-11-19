@@ -1,16 +1,16 @@
 #!/bin/bash
-# mcontrolcenter-gpu - boot-time power switch for the DISCRETE NVIDIA GPU of a hybrid laptop.
+# mcenter-gpu - boot-time power switch for the DISCRETE NVIDIA GPU of a hybrid laptop.
 #
-#   mcontrolcenter-gpu status     key=value report (no root)
-#   mcontrolcenter-gpu set off    keep every NVIDIA driver off the dGPU at the next boot so it can sit in D3cold (root)
-#   mcontrolcenter-gpu set on     back to normal (root)
+#   mcenter-gpu status     key=value report (no root)
+#   mcenter-gpu set off    keep every NVIDIA driver off the dGPU at the next boot so it can sit in D3cold (root)
+#   mcenter-gpu set on     back to normal (root)
 #
 # This is NOT a hardware MUX switch (MSI MUX/"discrete mode" is a BIOS setting and cannot be changed from Linux). It only decides whether a
 # kernel driver binds the dGPU at boot. Nothing is ever detached while the system is running: that has hung kernels on some laptops.
 # While the dGPU is off, every display output wired to it (often HDMI / USB-C DP) does not work.
 set -u
-CONF=/etc/modprobe.d/mcontrolcenter-dgpu-off.conf
-RULE=/etc/udev/rules.d/80-mcontrolcenter-dgpu-off.rules
+CONF=/etc/modprobe.d/mcenter-dgpu-off.conf
+RULE=/etc/udev/rules.d/80-mcenter-dgpu-off.rules
 have() { command -v "$1" >/dev/null 2>&1; }
 
 find_dgpu() {   # first display controller that is not the boot (integrated) one
@@ -49,7 +49,7 @@ set_mode() {
         [ -n "$dev" ] && [ "$(cat "$dev/vendor")" = 0x10de ] || { echo "no supported discrete NVIDIA GPU" >&2; exit 2; }
         has_igpu || { echo "refusing: there is no integrated GPU to fall back on" >&2; exit 2; }
         cat > "$CONF" <<'C'
-# Written by mcontrolcenter-gpu: keep all NVIDIA drivers off the discrete GPU (remove this file or run `mcontrolcenter-gpu set on` to undo).
+# Written by mcenter-gpu: keep all NVIDIA drivers off the discrete GPU (remove this file or run `mcenter-gpu set on` to undo).
 blacklist nouveau
 blacklist nvidia
 blacklist nvidia_drm
@@ -59,7 +59,7 @@ install nouveau /bin/false
 install nvidia /bin/false
 C
         cat > "$RULE" <<'R'
-# Written by mcontrolcenter-gpu: let the driverless NVIDIA GPU runtime-suspend into D3cold.
+# Written by mcenter-gpu: let the driverless NVIDIA GPU runtime-suspend into D3cold.
 ACTION=="add|bind", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x03*", TEST=="power/control", ATTR{power/control}="auto"
 R
     else

@@ -1,14 +1,14 @@
 name: Hardware report (my MSI model)
-description: Tell us how MControlCenter behaves on your laptop - this is how we widen device support.
+description: Tell us how Mcenter behaves on your laptop - this is how we widen device support.
 labels: ["hardware-report"]
 body:
   - type: markdown
     attributes:
       value: |
-        Run `/usr/libexec/mcontrolcenter/mcontrolcenter-doctor report` (or `scripts/mcontrolcenter-doctor report` from the repo) and paste the output below. It contains no serial numbers or personal data.
+        Run `/usr/libexec/mcenter/mcenter-doctor report` (or `scripts/mcenter-doctor report` from the repo) and paste the output below. It contains no serial numbers or personal data.
   - type: textarea
     id: report
-    attributes: { label: Output of mcontrolcenter-doctor report, render: markdown }
+    attributes: { label: Output of mcenter-doctor report, render: markdown }
     validations: { required: true }
   - type: checkboxes
     id: works

@@ -48,14 +48,14 @@ void SensorWorker::poll() {
     s.chargeNow = rdi(batPath + "/charge_now", 0); s.chargeFull = rdi(batPath + "/charge_full", 0); s.chargeDesign = rdi(batPath + "/charge_full_design", 0); s.cycles = rdi(batPath + "/cycle_count", 0);
     s.ac = !acPath.isEmpty() && rdi(acPath + "/online", 0) == 1;
     s.dgpu = dgpuPath.isEmpty() ? QString() : rd(dgpuPath + "/power_state");
-    s.gpuKnown = true;                                                    // discrete GPU boot-mode info (the same facts mcontrolcenter-gpu status prints)
+    s.gpuKnown = true;                                                    // discrete GPU boot-mode info (the same facts mcenter-gpu status prints)
     if (dgpuPath.isEmpty()) { s.gpuReason = "no discrete GPU found"; }
     else if (rd(dgpuPath + "/vendor") != "0x10de") { s.gpuReason = "only NVIDIA discrete GPUs are supported"; }
     else if (!hasIgpu) { s.gpuReason = "there is no integrated GPU to fall back on"; }
     else {
         s.gpuSupported = true; QFileInfo drv(dgpuPath + "/driver"); s.gpuDriver = drv.isSymLink() ? QFileInfo(drv.symLinkTarget()).fileName() : QString("none");
         s.gpuPower = s.dgpu.isEmpty() ? QString("unknown") : s.dgpu; s.gpuActive = rdi(dgpuPath + "/power/runtime_active_time", 0); s.gpuSusp = rdi(dgpuPath + "/power/runtime_suspended_time", 0);
-        s.gpuMode = (QFile::exists("/etc/modprobe.d/mcontrolcenter-dgpu-off.conf") || QFile::exists("/etc/modprobe.d/dgpu-off.conf")) ? "off" : "on";
+        s.gpuMode = (QFile::exists("/etc/modprobe.d/mcenter-dgpu-off.conf") || QFile::exists("/etc/modprobe.d/dgpu-off.conf")) ? "off" : "on";
     }
     for (const QString &h : QDir("/sys/class/hwmon").entryList({"hwmon*"}, QDir::Dirs)) if (rd("/sys/class/hwmon/" + h + "/name") == "nvme") { s.nvme = int(rdi("/sys/class/hwmon/" + h + "/temp1_input") / 1000); break; }
     QStringList st = rd("/proc/stat").section('\n', 0, 0).split(' ', Qt::SkipEmptyParts);

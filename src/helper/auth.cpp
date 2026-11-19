@@ -12,7 +12,7 @@
 #include <cstdio>
 
 namespace {
-const char kAction[] = "io.github.dmitry_s93.mcontrolcenter.helper-write";
+const char kAction[] = "io.github.p34t1k.mcenter.helper-write";
 const qint64 kQuickMs = 5000;           // a fan-curve apply is ~30 calls: ask polkit once per caller per 5 s
 const qint64 kInteractiveMs = 600000;   // after the user typed the admin password, remember it for 10 minutes (that bus connection only)
 

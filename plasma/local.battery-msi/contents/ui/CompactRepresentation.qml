@@ -69,7 +69,7 @@ MouseArea {
         active: root.containsMouse
     }
 
-    // a small dot in the current MSI mode colour (only while MControlCenter is running)
+    // a small dot in the current MSI mode colour (only while Mcenter is running)
     Rectangle {
         visible: !!root.msi && root.msi.online && root.msi.modeIndex >= 0
         width: Math.max(5, Math.round(parent.height * 0.2)); height: width; radius: 0

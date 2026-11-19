@@ -24,12 +24,12 @@ jobs:
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build --parallel
       - name: Shell scripts
         run: |
-          for f in install.sh scripts/mcontrolcenter-doctor scripts/mcontrolcenter-gpu scripts/mcontrolcenter-battery scripts/install-plasma-applet.sh tests/battery-test.sh; do bash -n "$f"; done
-          shellcheck -S error install.sh scripts/mcontrolcenter-doctor scripts/mcontrolcenter-gpu scripts/mcontrolcenter-battery scripts/install-plasma-applet.sh
+          for f in install.sh scripts/mcenter-doctor scripts/mcenter-gpu scripts/mcenter-battery scripts/install-plasma-applet.sh tests/battery-test.sh; do bash -n "$f"; done
+          shellcheck -S error install.sh scripts/mcenter-doctor scripts/mcenter-gpu scripts/mcenter-battery scripts/install-plasma-applet.sh
       - name: Calibration state machine (simulated battery)
         run: bash tests/battery-test.sh
       - name: Status commands run without root
         run: |
-          ./scripts/mcontrolcenter-doctor status || true
-          ./scripts/mcontrolcenter-gpu status || true
-          ./scripts/mcontrolcenter-battery status || true
+          ./scripts/mcenter-doctor status || true
+          ./scripts/mcenter-gpu status || true
+          ./scripts/mcenter-battery status || true

@@ -260,7 +260,7 @@ LightingPage::LightingPage(QWidget *p) : AnimPage(p) {
     for (int i = 0; i < 4; ++i) { Row r; r.type = Row::Switch; r.label = fl[i]; r.sub = fs[i]; r.click = [this, i] { if (onFollow) onFollow(i, !follow->rows[i].on); }; follow->rows.push_back(r); }
     { Row r; r.type = Row::Gap; follow->rows.push_back(r); }
     { Row r; r.type = Row::Button; r.label = "Restore stock lighting"; r.click = [this] { if (onRestoreFirmware) onRestoreFirmware(); }; follow->rows.push_back(r); }
-    { Row r; r.type = Row::Text; r.label = "Lighting is never written to the keyboard's memory. It is re-applied at login and after sleep; a reboot without MControlCenter restores the factory look."; follow->rows.push_back(r); }
+    { Row r; r.type = Row::Text; r.label = "Lighting is never written to the keyboard's memory. It is re-applied at login and after sleep; a reboot without Mcenter restores the factory look."; follow->rows.push_back(r); }
     follow->relayout();
 
     status->onAdvanced = [this] { setAdvanced(!advanced); };

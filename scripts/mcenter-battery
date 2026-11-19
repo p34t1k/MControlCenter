@@ -1,12 +1,12 @@
 #!/bin/bash
-# mcontrolcenter-battery - automatic battery calibration with the charger connected, for MSI laptops with the WMI2 interface.
+# mcenter-battery - automatic battery calibration with the charger connected, for MSI laptops with the WMI2 interface.
 #
-#   mcontrolcenter-battery status            key=value report: calibration state + whether this laptop can do it (no root)
-#   mcontrolcenter-battery start [--floor N] check everything, then run the calibration in the background (root). Exit 0 = started,
+#   mcenter-battery status            key=value report: calibration state + whether this laptop can do it (no root)
+#   mcenter-battery start [--floor N] check everything, then run the calibration in the background (root). Exit 0 = started,
 #                                            3 = this laptop cannot do it (use the manual guide), 4 = not possible right now (see reason=)
-#   mcontrolcenter-battery stop              cancel; the charger state and your charge limit are restored (root)
-#   mcontrolcenter-battery restore           put the charger state and charge limit back (root; safe to run any time)
-#   mcontrolcenter-battery boot              at boot: undo a calibration that was cut short (power loss, crash) (root)
+#   mcenter-battery stop              cancel; the charger state and your charge limit are restored (root)
+#   mcenter-battery restore           put the charger state and charge limit back (root; safe to run any time)
+#   mcenter-battery boot              at boot: undo a calibration that was cut short (power loss, crash) (root)
 #
 # How it works (reverse-engineered from MSI's own calibration tool, verified on a Crosshair 16 HX AI):
 #   MSI firmware register 0xBF bit 0 = "DC adapter simulation". With it set the embedded controller behaves as if the charger were unplugged,
@@ -20,12 +20,12 @@ GUID=ABBC0F6E-8EA1-11D1-00A0-C90629100000
 REG_SIM=191                                   # 0xBF
 # MCC_* variables exist only so the test-suite (tests/battery-test.sh) can run this script against a simulated battery; unset they change nothing
 PS="${MCC_PS:-/sys/class/power_supply}"; POLL="${MCC_POLL:-5}"; STALL="${MCC_STALL:-1200}"
-RUN="${MCC_RUN:-/run/mcontrolcenter}"; STATE=$RUN/calibration; LIB="${MCC_LIB:-/var/lib/mcontrolcenter}"; SAVE=$LIB/calibration.orig
-UNIT=mcontrolcenter-calibration
+RUN="${MCC_RUN:-/run/mcenter}"; STATE=$RUN/calibration; LIB="${MCC_LIB:-/var/lib/mcenter}"; SAVE=$LIB/calibration.orig
+UNIT=mcenter-calibration
 KVER="$(uname -r)"; SELF="$(readlink -f "$0")"
 BAT="$(ls -d "$PS"/BAT* 2>/dev/null | head -1)"
 LOADED_BY_US=0; FINAL=""; REASON=""
-log() { logger -t mcontrolcenter-battery -- "$*" 2>/dev/null || true; echo "[battery] $*" >&2; }
+log() { logger -t mcenter-battery -- "$*" 2>/dev/null || true; echo "[battery] $*" >&2; }
 is_root() { [ "$(id -u)" = 0 ] || [ -n "${MCC_FAKE_REGS:-}" ]; }
 have() { command -v "$1" >/dev/null 2>&1; }
 vendor_ok() { grep -qiE 'micro-star|msi' /sys/class/dmi/id/sys_vendor 2>/dev/null; }
@@ -143,13 +143,13 @@ cmd_start() {
     mkdir -p "$RUN" "$LIB"; chmod 755 "$RUN"
     ensure_driver || { echo "reason=the msi-wmi-platform driver could not be loaded (kernel headers/DKMS, or this firmware is not supported)"; exit 3; }
     local v; v="$(sim_get)" || { unload_driver; echo "reason=the firmware did not answer the adapter-simulation query"; exit 3; }
-    [ $((v & 1)) = 0 ] || { unload_driver; echo "reason=the adapter simulation is already on; run: mcontrolcenter-battery restore"; exit 4; }
+    [ $((v & 1)) = 0 ] || { unload_driver; echo "reason=the adapter simulation is already on; run: mcenter-battery restore"; exit 4; }
     [ "$(ac_online)" = 1 ] || { unload_driver; echo "reason=connect the charger first"; exit 4; }
     [ "$(cap)" -ge 15 ] || { unload_driver; echo "reason=battery is below 15 %: let it charge a little first"; exit 4; }
     unload_driver      # the run process loads it again; keeping the preflight free of side effects
     rm -f "$STATE"; st state=starting "msg=Starting" "floor=$floor" "started=$(date +%s)"
-    local inh=(); have systemd-inhibit && inh=(systemd-inhibit --what=sleep:handle-lid-switch --who=MControlCenter "--why=Battery calibration")
-    systemd-run --unit="$UNIT" --collect --quiet --description="MControlCenter battery calibration" \
+    local inh=(); have systemd-inhibit && inh=(systemd-inhibit --what=sleep:handle-lid-switch --who=Mcenter "--why=Battery calibration")
+    systemd-run --unit="$UNIT" --collect --quiet --description="Mcenter battery calibration" \
         -p KillMode=mixed -p TimeoutStopSec=90 -p "ExecStopPost=$SELF restore" \
         "${inh[@]}" "$SELF" run "--floor=$floor" || { echo "reason=could not start the background service"; exit 4; }
     echo "started=yes"; exit 0
@@ -184,7 +184,7 @@ eta_secs() {   # eta_secs <target_percent> <stage_start_charge> <stage_start_sec
 BOOST_PIDS=(); BL_FILE=""; BL_ORIG=""
 boost_on() {
     [ "${MCC_BOOST:-1}" = 0 ] && return 0
-    [ -f /etc/mcontrolcenter/no-calibration-boost ] && return 0
+    [ -f /etc/mcenter/no-calibration-boost ] && return 0
     local b; for b in /sys/class/backlight/*; do [ -w "$b/brightness" ] && [ -r "$b/max_brightness" ] && { BL_FILE="$b/brightness"; BL_ORIG="$(cat "$b/brightness")"; cat "$b/max_brightness" > "$BL_FILE" 2>/dev/null; echo "$BL_ORIG" > "$LIB/backlight.orig"; echo "$BL_FILE" >> "$LIB/backlight.orig"; break; }; done
     [ -n "${MCC_FAKE_REGS:-}" ] && return 0
     local n i; n="$(nproc 2>/dev/null || echo 2)"
@@ -202,7 +202,7 @@ cleanup() {
     do_restore
     local rr=$?
     if [ -z "$FINAL" ]; then st state=aborted "msg=${REASON:-Stopped}. Charger and charge limit restored."
-    elif [ $rr != 0 ]; then st state=error "msg=Finished, but restoring the charger state failed. Run: pkexec mcontrolcenter-battery restore"; fi
+    elif [ $rr != 0 ]; then st state=error "msg=Finished, but restoring the charger state failed. Run: pkexec mcenter-battery restore"; fi
     unload_driver
     exit $rc
 }
